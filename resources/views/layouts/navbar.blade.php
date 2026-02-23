@@ -24,7 +24,7 @@
                 <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-bs-toggle="dropdown"
                     aria-expanded="false">
                     <div class="nav-profile-img">
-                        <img src="{{ asset('assets/images/faces/face28.jpeg') }}" alt="image">
+                        <img src="{{ Auth::user()->avatar ?? asset('assets/images/faces/face28.jpeg') }}" alt="image">
                         <span class="availability-status online"></span>
                     </div>
                     <div class="nav-profile-text">
@@ -63,7 +63,7 @@
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item preview-item">
                         <div class="preview-thumbnail">
-                            <img src="{{ asset('assets/images/faces/face28.jpeg') }}" alt="image"
+                            <img src="{{ Auth::user()->avatar ?? asset('assets/images/faces/face28.jpeg') }}" alt="image"
                                 class="profile-pic">
                         </div>
                         <div class="preview-item-content d-flex align-items-start flex-column justify-content-center">
