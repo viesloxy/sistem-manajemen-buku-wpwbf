@@ -24,7 +24,9 @@
                 <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-bs-toggle="dropdown"
                     aria-expanded="false">
                     <div class="nav-profile-img">
-                        <img src="{{ Auth::user()->avatar ?? asset('assets/images/faces/face28.jpeg') }}" alt="image">
+                        <img src="{{ Auth::user()->avatar ?? asset('assets/images/faces/face28.jpeg') }}"
+                            referrerpolicy="no-referrer"
+                            alt="image">
                         <span class="availability-status online"></span>
                     </div>
                     <div class="nav-profile-text">

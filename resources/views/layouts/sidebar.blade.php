@@ -3,7 +3,9 @@
         <li class="nav-item nav-profile">
             <a href="#" class="nav-link">
                 <div class="nav-profile-image">
-                    <img src="{{ Auth::user()->avatar ?? asset('assets/images/faces/face28.jpeg') }}" alt="profile" />
+                    <img src="{{ Auth::user()->avatar ?? asset('assets/images/faces/face28.jpeg') }}"
+                        referrerpolicy="no-referrer"
+                        alt="profile" />
                     <span class="login-status online"></span>
                 </div>
                 <div class="nav-profile-text d-flex flex-column">
