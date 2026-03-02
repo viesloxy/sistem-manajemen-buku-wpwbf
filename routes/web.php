@@ -6,6 +6,7 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\BukuController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\BarangController;
 
 Auth::routes();
 
@@ -28,7 +29,12 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('kategori', KategoriController::class);
     Route::resource('buku', BukuController::class);
 
+    Route::post('barang/cetak-label', [BarangController::class, 'cetakLabel'])->name('barang.cetakLabel');
+    Route::resource('barang', BarangController::class);
+
     Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
     Route::get('laporan/katalog-pdf', [LaporanController::class, 'generateKatalog'])->name('laporan.katalog');
     Route::get('laporan/stok-pdf', [LaporanController::class, 'generateStok'])->name('laporan.stok');
+
+    Route::post('barang/cetak-label', [BarangController::class, 'cetakLabel'])->name('barang.cetakLabel');
 });

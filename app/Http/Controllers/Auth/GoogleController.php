@@ -30,13 +30,13 @@ class GoogleController extends Controller
                     'name' => $googleUser->getName(),
                     'email' => $googleUser->getEmail(),
                     'id_google' => $googleUser->getId(),
-                    'avatar' => $googleUser->getAvatar(), // Simpan avatar Google
+                    'avatar' => $googleUser->getAvatar(),
                     'password' => null,
                 ]);
             } else {
                 $user->update([
                     'id_google' => $googleUser->getId(),
-                    'avatar' => $googleUser->getAvatar(), // Update avatar terbaru
+                    'avatar' => $googleUser->getAvatar(),
                 ]);
             }
 

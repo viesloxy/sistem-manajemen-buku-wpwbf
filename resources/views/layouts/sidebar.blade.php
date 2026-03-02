@@ -51,5 +51,19 @@
                 </ul>
             </div>
         </li>
+        <li class="nav-item {{ Request::is('barang*') ? 'active' : '' }}">
+            <a class="nav-link" data-bs-toggle="collapse" href="#umkm-dropdown" aria-expanded="{{ Request::is('barang*') ? 'true' : 'false' }}" aria-controls="umkm-dropdown">
+                <span class="menu-title">Tag Harga UMKM</span>
+                <i class="menu-arrow"></i>
+                <i class="mdi mdi-tag-multiple menu-icon"></i>
+            </a>
+            <div class="collapse {{ Request::is('barang*') ? 'show' : '' }}" id="umkm-dropdown">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item">
+                        <a class="nav-link {{ Request::routeIs('barang.index') ? 'active' : '' }}" href="{{ route('barang.index') }}">Kelola Barang</a>
+                    </li>
+                </ul>
+            </div>
+        </li>
     </ul>
 </nav>
