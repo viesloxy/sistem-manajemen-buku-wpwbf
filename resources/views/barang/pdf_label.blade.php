@@ -4,78 +4,84 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <style>
         @page {
-            size: 21cm 17cm;
+            /* Kertas TnJ 108: 21cm x 17cm */
+            size: 210mm 170mm;
             margin: 0;
         }
         
         html, body {
             margin: 0;
             padding: 0;
-            width: 21cm;
-            height: 17cm;
+            width: 210mm;
+            height: 170mm;
             font-family: 'Helvetica', sans-serif;
             background-color: #fff;
         }
 
         /* Tabel Utama */
         .main-table {
-            width: 21cm;
+            /* 5 kolom x 41mm (pitch) = 205mm. Sisa 5mm dibagi untuk margin kiri 3mm & kanan 2mm */
+            width: 205mm; 
             border-collapse: collapse;
-            table-layout: fixed; /* Kunci lebar kolom agar tidak bergeser */
-            margin-top: 0.3cm;   /* Top Margin */
-            margin-left: 0.3cm;  /* Side Margin */
+            table-layout: fixed; 
+            margin-top: 3mm;   /* Top Margin 0.3cm */
+            margin-left: 3mm;  /* Side Margin 0.3cm */
+            border: none;
         }
 
-        /* Sel untuk Pitch (Ruang total per label termasuk celah) */
         .pitch-cell {
-            width: 4.1cm;        /* Horizontal Pitch */
-            height: 2.0cm;       /* Vertical Pitch */
+            width: 41mm;        /* Horizontal Pitch 4.1cm */
+            height: 20mm;       /* Vertical Pitch 2.0cm */
             padding: 0;
             margin: 0;
             vertical-align: top;
             overflow: hidden;
+            border: none;
         }
 
         /* Kotak Label Asli (3.8cm x 1.8cm) */
         .label-content {
-            width: 3.8cm;
-            height: 1.8cm;
+            width: 38mm;
+            height: 18mm;
             text-align: center;
             box-sizing: border-box;
-            /* Border tipis untuk membantu saat testing, hapus jika sudah fix */
+            /* Border sangat tipis hanya untuk panduan, bisa dihapus jika sudah yakin */
             border: 0.1pt solid #f0f0f0; 
-            padding-top: 5px;
+            padding-top: 1.5mm;
             overflow: hidden;
         }
 
-        /* Styling teks */
+        /* Styling teks agar pas di kotak kecil */
         .item-name {
             font-size: 7.5pt;
             font-weight: bold;
             display: block;
             white-space: nowrap;
             overflow: hidden;
-            margin-bottom: 1px;
-            padding: 0 3px;
+            margin-bottom: 0.5mm;
+            padding: 0 2mm;
+            color: #000;
         }
 
         .line {
             border-top: 0.5pt solid #000;
-            width: 80%;
-            margin: 1px auto;
+            width: 85%;
+            margin: 0.5mm auto;
         }
 
         .item-price {
             font-size: 10pt;
             font-weight: bold;
             display: block;
-            margin-top: 2px;
+            margin-top: 1mm;
+            color: #000;
         }
 
         .item-id {
             font-size: 6pt;
             color: #555;
             display: block;
+            margin-top: 0.5mm;
         }
     </style>
 </head>

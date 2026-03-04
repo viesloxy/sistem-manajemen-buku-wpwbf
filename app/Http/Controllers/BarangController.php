@@ -16,7 +16,6 @@ class BarangController extends Controller
 
     public function create()
     {
-        // Mengarahkan ke file form.blade.php
         return view('barang.form');
     }
 
@@ -34,7 +33,6 @@ class BarangController extends Controller
     public function edit($id)
     {
         $barang = Barang::findOrFail($id);
-        // Mengarahkan ke file form.blade.php dengan membawa data barang
         return view('barang.form', compact('barang'));
     }
 
