@@ -25,7 +25,9 @@
                         <input type="text" class="form-control" id="nama_kategori" name="nama_kategori" placeholder="Contoh: Novel" value="{{ $kategori->nama_kategori ?? '' }}" required>
                     </div>
 
-                    <button type="submit" class="btn btn-gradient-primary me-2">Simpan</button>
+                    <button type="button" class="btn btn-gradient-primary me-2 btn-submit">
+                        <span class="btn-text">Simpan</span>
+                    </button>
                     <a href="{{ route('kategori.index') }}" class="btn btn-light">Batal</a>
                 </form>
             </div>

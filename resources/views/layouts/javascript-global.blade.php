@@ -9,4 +9,5 @@
 <script src="{{ asset('assets/js/settings.js') }}"></script>
 <script src="{{ asset('assets/js/todolist.js') }}"></script>
 <script src="{{ asset('assets/js/jquery.cookie.js') }}"></script>
+<script src="{{ asset('assets/js/submit-handler.js') }}"></script>
 <!-- endinject -->

@@ -49,7 +49,9 @@
                         <input type="text" class="form-control" name="pengarang" placeholder="Nama Pengarang" value="{{ $buku->pengarang ?? '' }}" required>
                     </div>
 
-                    <button type="submit" class="btn btn-gradient-primary me-2">Simpan</button>
+                    <button type="button" class="btn btn-gradient-primary me-2 btn-submit">
+                        <span class="btn-text">Simpan</span>
+                    </button>
                     <a href="{{ route('buku.index') }}" class="btn btn-light">Batal</a>
                 </form>
             </div>

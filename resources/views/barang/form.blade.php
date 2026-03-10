@@ -47,8 +47,9 @@
                         <input type="number" class="form-control" name="harga" id="harga" placeholder="Contoh: 15000" value="{{ $barang->harga ?? old('harga') }}" required>
                     </div>
 
-                    <button type="submit" class="btn btn-gradient-primary me-2">
-                        <i class="mdi mdi-content-save me-1"></i> Simpan Data
+                    <button type="button" class="btn btn-gradient-primary me-2 btn-submit">
+                        <i class="mdi mdi-content-save me-1"></i> 
+                        <span class="btn-text">{{ isset($barang) ? 'Update Data' : 'Simpan Data' }}</span>
                     </button>
                     <a href="{{ route('barang.index') }}" class="btn btn-light">Batal</a>
                 </form>

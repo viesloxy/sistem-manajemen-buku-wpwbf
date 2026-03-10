@@ -10,7 +10,6 @@ use App\Http\Controllers\BarangController;
 
 Auth::routes();
 
-// Google Login & OTP harus di luar middleware auth agar bisa diakses saat tamu (guest)
 Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
 Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 Route::get('auth/otp', [GoogleController::class, 'showOtpForm'])->name('otp.view');
@@ -37,4 +36,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('laporan/stok-pdf', [LaporanController::class, 'generateStok'])->name('laporan.stok');
 
     Route::post('barang/cetak-label', [BarangController::class, 'cetakLabel'])->name('barang.cetakLabel');
+
+    Route::get('/simulasi-produk', function () {
+        return view('simulasi.simulasi-index');
+    })->name('simulasi.index');
+
+    Route::get('/simulasi-datatables', function () {
+        return view('simulasi.simulasi-datatables');
+    })->name('simulasi.datatables');
+
+    Route::get('/simulasi-wilayah', function () {
+        return view('simulasi.simulasi-wilayah');
+    })->name('simulasi.wilayah');
 });
