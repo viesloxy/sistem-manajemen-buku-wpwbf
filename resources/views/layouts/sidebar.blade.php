@@ -87,5 +87,19 @@
                 </ul>
             </div>
         </li>
+
+        <li class="nav-item {{ Request::is('wilayah*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('wilayah.index') }}">
+                <span class="menu-title">Wilayah Administrasi</span>
+                <i class="mdi mdi-map-marker-radius menu-icon"></i>
+            </a>
+        </li>
+
+        <li class="nav-item {{ Request::is('kasir*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('kasir.index') }}">
+                <span class="menu-title">Transaksi Kasir (POS)</span>
+                <i class="mdi mdi-cash-register menu-icon"></i>
+            </a>
+        </li>
     </ul>
 </nav>
