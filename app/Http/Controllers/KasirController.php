@@ -13,12 +13,13 @@ class KasirController extends Controller
     }
 
     public function cekBarang($kode) {
-        $kodeClean = trim($kode);
-        
-        // Menggunakan query mentah PostgreSQL untuk memastikan pencarian string presisi
-        $barang = DB::table('barang')
-            ->whereRaw("TRIM(id_barang) = ?", [$kodeClean])
-            ->first();
+        $kodeSearch = trim($kode);
+
+        $barang = Barang::where('id_barang', $kodeSearch)->first();
+
+        if (!$barang) {
+            $barang = Barang::all()->firstWhere('id_barang', $kodeSearch);
+        }
 
         if ($barang) {
             return response()->json([

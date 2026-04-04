@@ -62,7 +62,7 @@
         </div>
     </div>
 
-    <!-- Tabel Daftar Transaksi (Urutan: Kode, Nama, Harga, Jumlah, Subtotal) -->
+    <!-- Tabel Daftar Transaksi -->
     <div class="col-md-7 grid-margin stretch-card">
         <div class="card">
             <div class="card-body">
@@ -74,7 +74,7 @@
                                 <th>Kode</th>
                                 <th>Nama</th>
                                 <th>Harga</th>
-                                <th>Jumlah</th>
+                                <th width="80">Jumlah</th>
                                 <th>Subtotal</th>
                                 <th width="40">#</th>
                             </tr>
@@ -109,7 +109,7 @@
 $(document).ready(function() {
     let keranjang = [];
 
-    // 1. CARI BARANG
+    // --- 1. CARI BARANG & LOCK INPUT KODE ---
     function cariBarang() {
         let kode = $('#kode_barang').val().trim();
         if(!kode) return;
@@ -121,18 +121,41 @@ $(document).ready(function() {
                 $('#harga_barang').val(d.harga);
                 $('#jumlah_barang').val(1);
                 $('#btnTambah').prop('disabled', false);
+
+                // LOGIKA BARU: Kunci input kode agar tidak bisa diedit setelah dienter
+                $('#kode_barang').prop('readonly', true).addClass('bg-light');
+                $('#jumlah_barang').focus(); // Otomatis pindah kursor ke input jumlah
             })
             .catch(() => {
-                Swal.fire('Oops!', 'Kode barang tidak terdaftar', 'warning');
+                Swal.fire('Oops!', 'Kode barang [' + kode + '] tidak terdaftar', 'warning');
                 $('#nama_barang, #harga_barang').val('');
                 $('#btnTambah').prop('disabled', true);
             });
     }
 
-    $('#kode_barang').on('keypress', function(e) { if(e.which == 13) { e.preventDefault(); cariBarang(); } });
+    $('#kode_barang').on('keypress', function(e) { 
+        if(e.which == 13) { 
+            e.preventDefault(); 
+            // Jangan cari lagi jika sudah terkunci
+            if (!$(this).prop('readonly')) {
+                cariBarang(); 
+            } else {
+                $('#btnTambah').click();
+            }
+        } 
+    });
 
-    // 2. TAMBAH KE TABEL (LOADER)
+    // --- 2. TAMBAH KE TABEL (LOADER & VALIDASI QTY) ---
     $('#btnTambah').on('click', function() {
+        let qty = parseInt($('#jumlah_barang').val());
+
+        // LOGIKA BARU: Tolak input qty jika 0 atau minus
+        if (isNaN(qty) || qty <= 0) {
+            Swal.fire('Tidak Valid', 'Jumlah barang harus 1 atau lebih!', 'error');
+            $('#jumlah_barang').val(1).focus();
+            return;
+        }
+
         let btn = $(this);
         let btnText = btn.find('.btn-text');
         let oldHtml = btnText.html();
@@ -143,7 +166,6 @@ $(document).ready(function() {
         setTimeout(() => {
             let kode = $('#kode_barang').val();
             let harga = parseInt($('#harga_barang').val());
-            let qty = parseInt($('#jumlah_barang').val());
 
             let idx = keranjang.findIndex(x => x.id_barang === kode);
             if(idx !== -1) {
@@ -174,7 +196,9 @@ $(document).ready(function() {
                     <td class="text-center">${item.id_barang}</td>
                     <td>${item.nama}</td>
                     <td class="text-end">${item.harga.toLocaleString('id-ID')}</td>
-                    <td class="text-center"><input type="number" class="form-control form-control-sm upd-qty text-center" data-i="${i}" value="${item.jumlah}" min="1"></td>
+                    <td class="text-center">
+                        <input type="number" class="form-control form-control-sm upd-qty text-center border-primary" data-i="${i}" value="${item.jumlah}" min="1">
+                    </td>
                     <td class="text-end font-weight-bold">${item.subtotal.toLocaleString('id-ID')}</td>
                     <td class="text-center"><button class="btn btn-sm btn-link text-danger btn-del" data-i="${i}"><i class="mdi mdi-delete-variant"></i></button></td>
                 </tr>`;
@@ -184,9 +208,17 @@ $(document).ready(function() {
         $('#btnBayar').prop('disabled', keranjang.length === 0);
     }
 
+    // LOGIKA BARU: Proteksi qty agar tidak bisa minus saat diubah dari tabel
     $(document).on('change', '.upd-qty', function() {
         let i = $(this).data('i');
-        let v = parseInt($(this).val()) || 1;
+        let v = parseInt($(this).val());
+        
+        if (isNaN(v) || v <= 0) {
+            Swal.fire('Info', 'Minimal jumlah barang adalah 1', 'info');
+            v = 1;
+            $(this).val(1);
+        }
+
         keranjang[i].jumlah = v;
         keranjang[i].subtotal = keranjang[i].harga * v;
         render();
@@ -198,12 +230,14 @@ $(document).ready(function() {
     });
 
     function clear() {
-        $('#kode_barang').val('').focus();
+        // LOGIKA BARU: Buka kembali kunci input agar kasir bisa input barang lain
+        $('#kode_barang').val('').prop('readonly', false).removeClass('bg-light').focus();
         $('#nama_barang, #harga_barang').val('');
+        $('#jumlah_barang').val(1);
         $('#btnTambah').prop('disabled', true);
     }
 
-    // 3. BAYAR (LOADER)
+    // --- 3. BAYAR (LOADER) ---
     $('#btnBayar').on('click', function() {
         let btn = $(this);
         let btnText = btn.find('.btn-text');

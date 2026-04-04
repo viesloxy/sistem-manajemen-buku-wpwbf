@@ -36,7 +36,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('laporan/katalog-pdf', [LaporanController::class, 'generateKatalog'])->name('laporan.katalog');
     Route::get('laporan/stok-pdf', [LaporanController::class, 'generateStok'])->name('laporan.stok');
 
-    // --- Menu Simulasi ---
     Route::get('/simulasi-produk', function () {
         return view('simulasi.simulasi-index');
     })->name('simulasi.index');
@@ -49,7 +48,6 @@ Route::middleware(['auth'])->group(function () {
         return view('simulasi.simulasi-wilayah');
     })->name('simulasi.wilayah');
 
-    // --- Menu Wilayah Administrasi ---
     Route::get('/wilayah-indonesia', [WilayahController::class, 'index'])->name('wilayah.index');
     Route::prefix('api-wilayah')->group(function () {
         Route::get('/provinsi', [WilayahController::class, 'getProvinsi'])->name('api.provinsi');
@@ -58,7 +56,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/kelurahan/{id}', [WilayahController::class, 'getKelurahan'])->name('api.kelurahan');
     });
 
-    // --- Menu Kasir ---
     Route::get('/kasir', [KasirController::class, 'index'])->name('kasir.index');
     Route::prefix('api-kasir')->group(function () {
         Route::get('/barang/{kode}', [KasirController::class, 'cekBarang'])->name('api.kasir.cek');

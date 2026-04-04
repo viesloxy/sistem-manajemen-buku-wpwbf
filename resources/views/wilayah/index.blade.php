@@ -102,7 +102,7 @@
 <script>
 $(document).ready(function() {
     
-    // 1. AJAX JQUERY - LOAD PROVINSI
+    // AJAX JQUERY - LOAD PROVINSI
     function loadProvinsi() {
         $.ajax({
             method: "GET",
@@ -119,7 +119,7 @@ $(document).ready(function() {
 
     loadProvinsi();
 
-    // 2. AXIOS - LOAD KABUPATEN
+    // AXIOS - LOAD KABUPATEN
     $('#provinsi').on('change', function() {
         let id = $(this).val();
         resetDropdown(['#kabupaten', '#kecamatan', '#kelurahan']);
@@ -139,7 +139,7 @@ $(document).ready(function() {
         }
     });
 
-    // 3. AXIOS - LOAD KECAMATAN
+    // AXIOS - LOAD KECAMATAN
     $('#kabupaten').on('change', function() {
         let id = $(this).val();
         resetDropdown(['#kecamatan', '#kelurahan']);
@@ -159,7 +159,7 @@ $(document).ready(function() {
         }
     });
 
-    // 4. AXIOS - LOAD KELURAHAN
+    // AXIOS - LOAD KELURAHAN
     $('#kecamatan').on('change', function() {
         let id = $(this).val();
         resetDropdown(['#kelurahan']);
