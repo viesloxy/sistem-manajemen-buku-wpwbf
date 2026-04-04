@@ -1,5 +1,6 @@
 <nav class="sidebar sidebar-offcanvas" id="sidebar">
     <ul class="nav">
+        <!-- PROFIL USER -->
         <li class="nav-item nav-profile">
             <a href="#" class="nav-link">
                 <div class="nav-profile-image">
@@ -11,11 +12,14 @@
                 <div class="nav-profile-text d-flex flex-column">
                     <span class="font-weight-bold mb-2">{{ Auth::user()->name ?? 'User' }}</span>
                     <span class="text-secondary text-small">{{ Auth::user()->email }}</span>
+                    <!-- Tampilkan Badge Role -->
+                    <span class="badge badge-success mt-1" style="width: fit-content;">{{ strtoupper(Auth::user()->role) }}</span>
                 </div>
                 <i class="mdi mdi-bookmark-check text-success nav-profile-badge"></i>
             </a>
         </li>
 
+        <!-- MENU GLOBAL (Dilihat oleh Admin & Vendor) -->
         <li class="nav-item {{ Request::is('/') ? 'active' : '' }}">
             <a class="nav-link" href="{{ url('/') }}">
                 <span class="menu-title">Dashboard</span>
@@ -23,83 +27,123 @@
             </a>
         </li>
 
-        <li class="nav-item {{ Request::is('kategori*') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('kategori.index') }}">
-                <span class="menu-title">Kategori</span>
-                <i class="mdi mdi-format-list-bulleted menu-icon"></i>
-            </a>
-        </li>
+        <!-- ============================== -->
+        <!-- MULAI MENU KHUSUS ADMIN -->
+        <!-- ============================== -->
+        @if(Auth::user()->role == 'admin')
+            <li class="nav-item pt-3">
+                <span class="nav-link text-muted font-weight-bold" style="font-size: 12px; letter-spacing: 1px;">MENU ADMIN</span>
+            </li>
 
-        <li class="nav-item {{ Request::is('buku*') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('buku.index') }}">
-                <span class="menu-title">Buku</span>
-                <i class="mdi mdi-book-open-page-variant menu-icon"></i>
-            </a>
-        </li>
+            <li class="nav-item {{ Request::is('kategori*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('kategori.index') }}">
+                    <span class="menu-title">Kategori</span>
+                    <i class="mdi mdi-format-list-bulleted menu-icon"></i>
+                </a>
+            </li>
 
-        <li class="nav-item {{ Request::is('laporan*') ? 'active' : '' }}">
-            <a class="nav-link" data-bs-toggle="collapse" href="#laporan-pdf" aria-expanded="false" aria-controls="laporan-pdf">
-                <span class="menu-title">Laporan & PDF</span>
-                <i class="menu-arrow"></i>
-                <i class="mdi mdi-file-document menu-icon"></i>
-            </a>
-            <div class="collapse {{ Request::is('laporan*') ? 'show' : '' }}" id="laporan-pdf">
-                <ul class="nav flex-column sub-menu">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('laporan.index') }}">Pilih Laporan</a>
-                    </li>
-                </ul>
-            </div>
-        </li>
+            <li class="nav-item {{ Request::is('buku*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('buku.index') }}">
+                    <span class="menu-title">Buku</span>
+                    <i class="mdi mdi-book-open-page-variant menu-icon"></i>
+                </a>
+            </li>
 
-        <li class="nav-item {{ Request::is('barang*') ? 'active' : '' }}">
-            <a class="nav-link" data-bs-toggle="collapse" href="#umkm-dropdown" aria-expanded="{{ Request::is('barang*') ? 'true' : 'false' }}" aria-controls="umkm-dropdown">
-                <span class="menu-title">Tag Harga UMKM</span>
-                <i class="menu-arrow"></i>
-                <i class="mdi mdi-tag-multiple menu-icon"></i>
-            </a>
-            <div class="collapse {{ Request::is('barang*') ? 'show' : '' }}" id="umkm-dropdown">
-                <ul class="nav flex-column sub-menu">
-                    <li class="nav-item">
-                        <a class="nav-link {{ Request::routeIs('barang.index') ? 'active' : '' }}" href="{{ route('barang.index') }}">Kelola Barang</a>
-                    </li>
-                </ul>
-            </div>
-        </li>
+            <li class="nav-item {{ Request::is('laporan*') ? 'active' : '' }}">
+                <a class="nav-link" data-bs-toggle="collapse" href="#laporan-pdf" aria-expanded="false" aria-controls="laporan-pdf">
+                    <span class="menu-title">Laporan & PDF</span>
+                    <i class="menu-arrow"></i>
+                    <i class="mdi mdi-file-document menu-icon"></i>
+                </a>
+                <div class="collapse {{ Request::is('laporan*') ? 'show' : '' }}" id="laporan-pdf">
+                    <ul class="nav flex-column sub-menu">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('laporan.index') }}">Pilih Laporan</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
 
-        <li class="nav-item {{ Request::is('simulasi*') ? 'active' : '' }}">
-            <a class="nav-link" data-bs-toggle="collapse" href="#simulasi-transaksi" aria-expanded="{{ Request::is('simulasi*') ? 'true' : 'false' }}" aria-controls="simulasi-transaksi">
-                <span class="menu-title">Simulasi Transaksi</span>
-                <i class="menu-arrow"></i>
-                <i class="mdi mdi-script-text menu-icon"></i>
-            </a>
-            <div class="collapse {{ Request::is('simulasi*') ? 'show' : '' }}" id="simulasi-transaksi">
-                <ul class="nav flex-column sub-menu">
-                    <li class="nav-item"> 
-                        <a class="nav-link {{ Request::is('simulasi-produk') ? 'active' : '' }}" href="{{ route('simulasi.index') }}">Simulasi Produk</a>
-                    </li>
-                    <li class="nav-item"> 
-                        <a class="nav-link {{ Request::is('simulasi-datatables') ? 'active' : '' }}" href="{{ route('simulasi.datatables') }}">Simulasi Produk (DataTables)</a>
-                    </li>
-                    <li class="nav-item"> 
-                        <a class="nav-link {{ Request::is('simulasi-wilayah') ? 'active' : '' }}" href="{{ route('simulasi.wilayah') }}">Wilayah Pengiriman</a>
-                    </li>
-                </ul>
-            </div>
-        </li>
+            <li class="nav-item {{ Request::is('barang*') ? 'active' : '' }}">
+                <a class="nav-link" data-bs-toggle="collapse" href="#umkm-dropdown" aria-expanded="{{ Request::is('barang*') ? 'true' : 'false' }}" aria-controls="umkm-dropdown">
+                    <span class="menu-title">Tag Harga UMKM</span>
+                    <i class="menu-arrow"></i>
+                    <i class="mdi mdi-tag-multiple menu-icon"></i>
+                </a>
+                <div class="collapse {{ Request::is('barang*') ? 'show' : '' }}" id="umkm-dropdown">
+                    <ul class="nav flex-column sub-menu">
+                        <li class="nav-item">
+                            <a class="nav-link {{ Request::routeIs('barang.index') ? 'active' : '' }}" href="{{ route('barang.index') }}">Kelola Barang</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
 
-        <li class="nav-item {{ Request::is('wilayah*') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('wilayah.index') }}">
-                <span class="menu-title">Wilayah Administrasi</span>
-                <i class="mdi mdi-map-marker-radius menu-icon"></i>
-            </a>
-        </li>
+            <li class="nav-item {{ Request::is('simulasi*') ? 'active' : '' }}">
+                <a class="nav-link" data-bs-toggle="collapse" href="#simulasi-transaksi" aria-expanded="{{ Request::is('simulasi*') ? 'true' : 'false' }}" aria-controls="simulasi-transaksi">
+                    <span class="menu-title">Simulasi Transaksi</span>
+                    <i class="menu-arrow"></i>
+                    <i class="mdi mdi-script-text menu-icon"></i>
+                </a>
+                <div class="collapse {{ Request::is('simulasi*') ? 'show' : '' }}" id="simulasi-transaksi">
+                    <ul class="nav flex-column sub-menu">
+                        <li class="nav-item"> 
+                            <a class="nav-link {{ Request::is('simulasi-produk') ? 'active' : '' }}" href="{{ route('simulasi.index') }}">Simulasi Produk</a>
+                        </li>
+                        <li class="nav-item"> 
+                            <a class="nav-link {{ Request::is('simulasi-datatables') ? 'active' : '' }}" href="{{ route('simulasi.datatables') }}">Simulasi Produk (DT)</a>
+                        </li>
+                        <li class="nav-item"> 
+                            <a class="nav-link {{ Request::is('simulasi-wilayah') ? 'active' : '' }}" href="{{ route('simulasi.wilayah') }}">Wilayah Pengiriman</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
 
-        <li class="nav-item {{ Request::is('kasir*') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('kasir.index') }}">
-                <span class="menu-title">Transaksi Kasir (POS)</span>
-                <i class="mdi mdi-cash-register menu-icon"></i>
-            </a>
-        </li>
+            <li class="nav-item {{ Request::is('wilayah*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('wilayah.index') }}">
+                    <span class="menu-title">Wilayah Administrasi</span>
+                    <i class="mdi mdi-map-marker-radius menu-icon"></i>
+                </a>
+            </li>
+
+            <li class="nav-item {{ Request::is('kasir*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('kasir.index') }}">
+                    <span class="menu-title">Transaksi Kasir (POS)</span>
+                    <i class="mdi mdi-cash-register menu-icon"></i>
+                </a>
+            </li>
+        @endif
+        <!-- ============================== -->
+        <!-- AKHIR MENU KHUSUS ADMIN -->
+        <!-- ============================== -->
+
+        <!-- ============================== -->
+        <!-- MULAI MENU KHUSUS VENDOR -->
+        <!-- ============================== -->
+        @if(Auth::user()->role == 'vendor')
+            <li class="nav-item pt-3">
+                <span class="nav-link text-muted font-weight-bold" style="font-size: 12px; letter-spacing: 1px;">MENU VENDOR</span>
+            </li>
+
+            <li class="nav-item">
+                <!-- Nanti href nya diganti ke route menu vendor -->
+                <a class="nav-link" href="#">
+                    <span class="menu-title">Master Menu Kantin</span>
+                    <i class="mdi mdi-food menu-icon"></i>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <!-- Nanti href nya diganti ke route pesanan vendor -->
+                <a class="nav-link" href="#">
+                    <span class="menu-title">Pesanan Masuk</span>
+                    <i class="mdi mdi-cart-arrow-down menu-icon"></i>
+                </a>
+            </li>
+        @endif
+        <!-- ============================== -->
+        <!-- AKHIR MENU KHUSUS VENDOR -->
+        <!-- ============================== -->
     </ul>
 </nav>
