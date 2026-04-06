@@ -71,7 +71,7 @@ class GoogleController extends Controller
             $user->update(['otp' => null]);
             Auth::login($user);
             session()->forget('otp_user_id');
-            return redirect('/');
+            return redirect('/dashboard');
         }
 
         return back()->withErrors(['otp' => 'Kode OTP salah!']);

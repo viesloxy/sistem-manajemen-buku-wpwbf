@@ -20,8 +20,9 @@
         </li>
 
         <!-- MENU GLOBAL (Dilihat oleh Admin & Vendor) -->
-        <li class="nav-item {{ Request::is('/') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ url('/') }}">
+        <!-- PERBAIKAN DI SINI: Mengarah ke /dashboard, bukan lagi / -->
+        <li class="nav-item {{ Request::is('dashboard') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('dashboard') }}">
                 <span class="menu-title">Dashboard</span>
                 <i class="mdi mdi-home menu-icon"></i>
             </a>
@@ -113,6 +114,13 @@
                     <i class="mdi mdi-cash-register menu-icon"></i>
                 </a>
             </li>
+
+            <li class="nav-item {{ Request::is('kelola-user*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('user.index') }}">
+                    <span class="menu-title">Kelola Pengguna</span>
+                    <i class="mdi mdi-account-multiple menu-icon"></i>
+                </a>
+            </li>
         @endif
         <!-- ============================== -->
         <!-- AKHIR MENU KHUSUS ADMIN -->
@@ -126,17 +134,15 @@
                 <span class="nav-link text-muted font-weight-bold" style="font-size: 12px; letter-spacing: 1px;">MENU VENDOR</span>
             </li>
 
-            <li class="nav-item">
-                <!-- Nanti href nya diganti ke route menu vendor -->
-                <a class="nav-link" href="#">
+            <li class="nav-item {{ Request::is('vendor/menu*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('vendor.menu.index') }}">
                     <span class="menu-title">Master Menu Kantin</span>
                     <i class="mdi mdi-food menu-icon"></i>
                 </a>
             </li>
             
-            <li class="nav-item">
-                <!-- Nanti href nya diganti ke route pesanan vendor -->
-                <a class="nav-link" href="#">
+            <li class="nav-item {{ Request::is('vendor/pesanan*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('vendor.pesanan.index') }}">
                     <span class="menu-title">Pesanan Masuk</span>
                     <i class="mdi mdi-cart-arrow-down menu-icon"></i>
                 </a>
