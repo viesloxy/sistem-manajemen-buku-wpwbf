@@ -46,42 +46,61 @@
             text-align: center;
             box-sizing: border-box;
             /* Border sangat tipis hanya untuk panduan, bisa dihapus jika sudah yakin */
-            border: 0.1pt solid #f0f0f0; 
-            padding-top: 1.5mm;
+            border: 0.1pt solid #f0f0f0;
+            padding-top: 1mm;
             overflow: hidden;
         }
 
         /* Styling teks agar pas di kotak kecil */
         .item-name {
-            font-size: 7.5pt;
+            font-size: 6pt;
             font-weight: bold;
             display: block;
             white-space: nowrap;
             overflow: hidden;
-            margin-bottom: 0.5mm;
+            margin-bottom: 0.3mm;
             padding: 0 2mm;
             color: #000;
+            line-height: 1;
         }
 
         .line {
-            border-top: 0.5pt solid #000;
+            border-top: 0.3pt solid #000;
             width: 85%;
-            margin: 0.5mm auto;
+            margin: 0.3mm auto;
         }
 
         .item-price {
-            font-size: 10pt;
+            font-size: 8pt;
             font-weight: bold;
             display: block;
-            margin-top: 1mm;
+            margin-top: 0.5mm;
             color: #000;
+            line-height: 1;
+        }
+
+        .barcode-container {
+            margin-top: 0.3mm;
+            line-height: 1;
+            text-align: center;
+            width: 100%;
+            display: block;
+        }
+
+        .barcode-container img {
+            display: inline-block;
+            margin: 0 auto;
+            text-align: center;
+            width: 30mm;
+            height: 8mm;
         }
 
         .item-id {
-            font-size: 6pt;
+            font-size: 5pt;
             color: #555;
             display: block;
-            margin-top: 0.5mm;
+            margin-top: 0.2mm;
+            line-height: 1;
         }
     </style>
 </head>
@@ -96,6 +115,11 @@
                     <div class="item-name">{{ strtoupper(substr($item->nama, 0, 24)) }}</div>
                     <div class="line"></div>
                     <div class="item-price">Rp {{ number_format($item->harga, 0, ',', '.') }}</div>
+                    @if(isset($item->barcode_base64))
+                    <div class="barcode-container">
+                        <img src="{{ $item->barcode_base64 }}" alt="barcode">
+                    </div>
+                    @endif
                     <div class="item-id">{{ $item->id_barang }}</div>
                 </div>
                 @endif
