@@ -626,6 +626,106 @@
         
         /* Purple Admin grid-margin override for closer spacing */
         .grid-margin { margin-bottom: 1.5rem !important; }
+
+        /* ── QR CODE MODAL ─────────────────────── */
+        .qr-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all .3s ease;
+        }
+        .qr-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .qr-modal-box {
+            background: #fff;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 380px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(0,0,0,.25);
+            transform: scale(.85) translateY(20px);
+            transition: transform .4s cubic-bezier(.34,1.56,.64,1);
+        }
+        .qr-modal-overlay.active .qr-modal-box {
+            transform: scale(1) translateY(0);
+        }
+        .qr-modal-icon {
+            width: 70px; height: 70px;
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.25rem;
+        }
+        .qr-modal-icon i {
+            font-size: 2rem;
+            color: #059669;
+        }
+        .qr-modal-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #1e1b4b;
+            margin-bottom: .35rem;
+        }
+        .qr-modal-sub {
+            font-size: .85rem;
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+        }
+        .qr-modal-code {
+            background: #fff;
+            border: 2px solid #e8dfff;
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 1.25rem;
+        }
+        .qr-modal-code img {
+            width: 180px;
+            height: 180px;
+            display: block;
+            margin: 0 auto;
+        }
+        .qr-modal-orderid {
+            font-size: .75rem;
+            color: #9ca3af;
+            margin-top: .5rem;
+        }
+        .qr-modal-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            background: linear-gradient(135deg, #6d28d9, #9a55ff);
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: .85rem;
+            padding: .85rem 2rem;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all .25s ease;
+            box-shadow: 0 6px 20px rgba(154,85,255,.4);
+        }
+        .qr-modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(154,85,255,.5);
+        }
+        .qr-modal-note {
+            font-size: .72rem;
+            color: #9ca3af;
+            margin-top: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -794,6 +894,25 @@
 
     <!-- ══ SCRIPTS ═════════════════════════════════ -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <!-- QR Code Modal -->
+    <div class="qr-modal-overlay" id="qrModal">
+        <div class="qr-modal-box">
+            <div class="qr-modal-icon">
+                <i class="mdi mdi-check-circle"></i>
+            </div>
+            <h3 class="qr-modal-title">Pembayaran Berhasil!</h3>
+            <p class="qr-modal-sub">Simpan QR Code ini untuk verifikasi pesanan</p>
+            <div class="qr-modal-code">
+                <img id="qrCodeImage" src="" alt="QR Code Pesanan">
+            </div>
+            <p class="qr-modal-orderid">Order ID: <strong id="qrOrderId">#0</strong></p>
+            <button class="qr-modal-btn" id="btnCloseQrModal">
+                <i class="mdi mdi-close"></i> Tutup
+            </button>
+            <p class="qr-modal-note">Tunjukkan QR Code ini ke vendor saat pengambilan buku</p>
+        </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -950,17 +1069,23 @@
             })
             .then(res => {
                 if (res.data.status === 'success') {
+                    const pesananId = res.data.pesanan_id;
+
                     window.snap.pay(res.data.snap_token, {
                         onSuccess: result => {
-                            Swal.fire('Pembayaran Berhasil! 🎉', 'Terima kasih! Pesanan buku Anda sedang diproses.', 'success')
-                                .then(() => window.location.reload());
+                            // Tampilkan modal QR Code
+                            $('#qrOrderId').text('#' + pesananId);
+                            $('#qrCodeImage').attr('src', '/qrcode/' + pesananId);
+                            $('#qrModal').addClass('active');
                         },
                         onPending: result => {
                             Swal.fire('Menunggu Pembayaran', 'Silakan selesaikan pembayaran Anda segera.', 'info')
                                 .then(() => window.location.reload());
                         },
                         onError: () => Swal.fire('Pembayaran Gagal', 'Silakan coba lagi.', 'error'),
-                        onClose: () => Swal.fire('Info', 'Anda menutup jendela pembayaran sebelum menyelesaikan transaksi.', 'warning')
+                        onClose: () => {
+                            Swal.fire('Info', 'Anda menutup jendela pembayaran sebelum menyelesaikan transaksi.', 'warning');
+                        }
                     });
                 }
             })
@@ -971,6 +1096,25 @@
             .finally(() => {
                 btn.prop('disabled', false).html(`<i class="mdi mdi-qrcode-scan"></i> BAYAR SEKARANG · QRIS / VA`);
             });
+        });
+
+        // Tutup modal QR Code
+        $('#btnCloseQrModal').on('click', function () {
+            $('#qrModal').removeClass('active');
+            // Tunggu animasi selesai sebelum reload
+            setTimeout(() => {
+                window.location.reload();
+            }, 300);
+        });
+
+        // Tutup modal saat klik overlay
+        $('#qrModal').on('click', function (e) {
+            if (e.target === this) {
+                $(this).removeClass('active');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 300);
+            }
         });
     });
     </script>

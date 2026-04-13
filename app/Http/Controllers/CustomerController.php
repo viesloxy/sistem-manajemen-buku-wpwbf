@@ -10,6 +10,8 @@ use App\Models\Vendor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
 
 class CustomerController extends Controller
 {
@@ -145,5 +147,43 @@ class CustomerController extends Controller
             }
         }
         return response()->json(['status' => 'success']);
+    }
+
+    // 6. Generate QR Code untuk Pesanan
+    public function generateQRCode($id)
+    {
+        $pesanan = Pesanan::find($id);
+
+        if (!$pesanan) {
+            return response()->json(['status' => 'error', 'message' => 'Pesanan tidak ditemukan'], 404);
+        }
+
+        // Buat QR Code berisi URL verifikasi pesanan
+        $verifyUrl = url('/pesanan/' . $id . '/verifikasi');
+
+        $qrCode = new QrCode($verifyUrl);
+
+        $writer = new PngWriter();
+        $result = $writer->write($qrCode);
+
+        // Return sebagai response dengan header yang tepat
+        return response($result->getString(), 200)
+            ->header('Content-Type', 'image/png')
+            ->header('Content-Disposition', 'inline; filename="qrcode-' . $id . '.png"');
+    }
+
+    // 7. Verifikasi Pesanan (bisa diakses via QR Code)
+    public function verifyPesanan($id)
+    {
+        $pesanan = Pesanan::with(['details.menu', 'details.menu.vendor'])->find($id);
+
+        if (!$pesanan) {
+            return view('customer.verify', ['status' => 'error', 'message' => 'Pesanan tidak ditemukan']);
+        }
+
+        return view('customer.verify', [
+            'status' => 'success',
+            'pesanan' => $pesanan
+        ]);
     }
 }

@@ -38,6 +38,12 @@ Route::prefix('customer/api')->group(function () {
 // Webhook Midtrans (WAJIB di luar auth agar Midtrans bisa ngirim data masuk)
 Route::post('/midtrans/callback', [CustomerController::class, 'midtransCallback'])->name('midtrans.callback');
 
+// QR Code API (tanpa auth - untuk modal popup setelah pembayaran)
+Route::get('/qrcode/{id}', [CustomerController::class, 'generateQRCode'])->name('customer.qrcode');
+
+// Verifikasi Pesanan via QR Code
+Route::get('/pesanan/{id}/verifikasi', [CustomerController::class, 'verifyPesanan'])->name('customer.verify');
+
 
 // =========================================================================
 // AREA WAJIB LOGIN (ADMIN & VENDOR SAJA)
