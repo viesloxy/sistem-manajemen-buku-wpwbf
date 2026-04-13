@@ -121,6 +121,34 @@
                     <i class="mdi mdi-account-multiple menu-icon"></i>
                 </a>
             </li>
+
+            <!-- STUDI KASUS 3: AKSES KAMERA -->
+            <li class="nav-item {{ Request::is('customer-data*') ? 'active' : '' }}">
+                <a class="nav-link" data-bs-toggle="collapse" href="#customer-menu" aria-expanded="{{ Request::is('customer-data*') ? 'true' : 'false' }}" aria-controls="customer-menu">
+                    <span class="menu-title">Customer</span>
+                    <i class="menu-arrow"></i>
+                    <i class="mdi mdi-account-box menu-icon"></i>
+                </a>
+                <div class="collapse {{ Request::is('customer-data*') ? 'show' : '' }}" id="customer-menu">
+                    <ul class="nav flex-column sub-menu">
+                        <li class="nav-item">
+                            <a class="nav-link {{ Request::is('customer-data') ? 'active' : '' }}" href="{{ route('customer-data.index') }}">
+                                Data Customer
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ Request::is('customer-data/create-blob') ? 'active' : '' }}" href="{{ route('customer-data.create-blob') }}">
+                                Tambah Customer 1
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ Request::is('customer-data/create-file') ? 'active' : '' }}" href="{{ route('customer-data.create-file') }}">
+                                Tambah Customer 2
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
         @endif
         <!-- ============================== -->
         <!-- AKHIR MENU KHUSUS ADMIN -->

@@ -12,6 +12,7 @@ use App\Http\Controllers\KasirController;
 use App\Http\Controllers\VendorMenuController;
 use App\Http\Controllers\VendorPesananController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\CustomerAccessController;
 
 Auth::routes();
 
@@ -91,6 +92,17 @@ Route::middleware(['auth'])->group(function () {
     // Kelola User / Vendor
     Route::get('/kelola-user', [App\Http\Controllers\AdminUserController::class, 'index'])->name('user.index');
     Route::patch('/kelola-user/{id}/role', [App\Http\Controllers\AdminUserController::class, 'updateRole'])->name('user.updateRole');
+
+    // --- STUDI KASUS 3: AKSES KAMERA - CUSTOMER MANAGEMENT (ADMIN) ---
+    Route::prefix('customer-data')->name('customer-data.')->group(function () {
+        Route::get('/', [CustomerAccessController::class, 'index'])->name('index');
+        Route::get('/create-blob', [CustomerAccessController::class, 'createBlob'])->name('create-blob');
+        Route::post('/store-blob', [CustomerAccessController::class, 'storeBlob'])->name('store-blob');
+        Route::get('/create-file', [CustomerAccessController::class, 'createFile'])->name('create-file');
+        Route::post('/store-file', [CustomerAccessController::class, 'storeFile'])->name('store-file');
+        Route::get('/{id}', [CustomerAccessController::class, 'show'])->name('show');
+        Route::delete('/{id}', [CustomerAccessController::class, 'destroy'])->name('destroy');
+    });
 
     // --- FITUR VENDOR ---
     Route::prefix('vendor')->name('vendor.')->group(function () {
