@@ -956,10 +956,15 @@
                 html += '<div class="list-group">';
                 orders.forEach(function(orderId) {
                     html += `
-                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 py-2">
                             <div>
                                 <strong>Pesanan #${orderId}</strong>
-                                <button class="btn btn-sm btn-outline-primary ms-2" onclick="window.open('/pesanan/${orderId}/verifikasi', '_blank')">
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="window.open('/pesanan/${orderId}/verifikasi', '_blank')">
+                                    <i class="mdi mdi-eye"></i> Detail
+                                </button>
+                                <button class="btn btn-sm btn-primary" onclick="window.open('/qrcode/${orderId}', '_blank')">
                                     <i class="mdi mdi-qrcode"></i> Lihat QR
                                 </button>
                             </div>
