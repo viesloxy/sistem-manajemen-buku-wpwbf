@@ -13,6 +13,7 @@ use App\Http\Controllers\VendorMenuController;
 use App\Http\Controllers\VendorPesananController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerAccessController;
+use App\Http\Controllers\ScannerBarangController;
 
 Auth::routes();
 
@@ -103,6 +104,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{id}', [CustomerAccessController::class, 'show'])->name('show');
         Route::delete('/{id}', [CustomerAccessController::class, 'destroy'])->name('destroy');
     });
+
+    // --- PRaktikum 1: SCANNER BARCODE & QR CODE ---
+    Route::get('/scanner', [ScannerBarangController::class, 'index'])->name('scanner.index');
+    Route::post('/scanner/cek-barang', [ScannerBarangController::class, 'cekBarang'])->name('scanner.cekBarang');
 
     // --- FITUR VENDOR ---
     Route::prefix('vendor')->name('vendor.')->group(function () {

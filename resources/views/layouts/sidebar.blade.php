@@ -122,6 +122,14 @@
                 </a>
             </li>
 
+            <!-- PRaktikum 1: SCANNER BARCODE & QR CODE -->
+            <li class="nav-item {{ Request::is('scanner*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('scanner.index') }}">
+                    <span class="menu-title">Scanner Barcode</span>
+                    <i class="mdi mdi-qrcode-scanner menu-icon"></i>
+                </a>
+            </li>
+
             <!-- STUDI KASUS 3: AKSES KAMERA -->
             <li class="nav-item {{ Request::is('customer-data*') ? 'active' : '' }}">
                 <a class="nav-link" data-bs-toggle="collapse" href="#customer-menu" aria-expanded="{{ Request::is('customer-data*') ? 'true' : 'false' }}" aria-controls="customer-menu">
