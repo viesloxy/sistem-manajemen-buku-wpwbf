@@ -738,9 +738,14 @@
             </div>
             <span>Kantin&nbsp;<span style="opacity:.7;font-weight:400">Buku</span></span>
         </a>
-        <a href="{{ route('login') }}" class="btn-login-topbar">
-            <i class="mdi mdi-login-variant"></i> Login
-        </a>
+        <div class="d-flex align-items-center gap-2">
+            <a href="#" id="btnMyOrders" class="btn-login-topbar" style="display:none;">
+                <i class="mdi mdi-receipt"></i> Pesanan Saya
+            </a>
+            <a href="{{ route('login') }}" class="btn-login-topbar">
+                <i class="mdi mdi-login-variant"></i> Login
+            </a>
+        </div>
     </div>
 
     <!-- ══ HERO ════════════════════════════════════ -->
@@ -924,6 +929,57 @@
         /* ── helpers ───────────────────────────── */
         function formatRp(n) { return parseInt(n).toLocaleString('id-ID'); }
 
+        /* ── Check for stored orders ──────────── */
+        function checkStoredOrders() {
+            const storedOrders = localStorage.getItem('customer_orders');
+            if (storedOrders && JSON.parse(storedOrders).length > 0) {
+                $('#btnMyOrders').show();
+            }
+        }
+
+        // Tampilkan modal pesanan saya
+        $('#btnMyOrders').on('click', function(e) {
+            e.preventDefault();
+            const storedOrders = localStorage.getItem('customer_orders');
+            if (storedOrders) {
+                const orders = JSON.parse(storedOrders);
+                // Tampilkan modal dengan daftar order
+                showMyOrdersModal(orders);
+            }
+        });
+
+        function showMyOrdersModal(orders) {
+            let html = '<div class="my-orders-list">';
+            if (orders.length === 0) {
+                html += '<p class="text-center text-muted">Belum ada pesanan.</p>';
+            } else {
+                html += '<div class="list-group">';
+                orders.forEach(function(orderId) {
+                    html += `
+                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                            <div>
+                                <strong>Pesanan #${orderId}</strong>
+                                <button class="btn btn-sm btn-outline-primary ms-2" onclick="window.open('/pesanan/${orderId}/verifikasi', '_blank')">
+                                    <i class="mdi mdi-qrcode"></i> Lihat QR
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+            html += '</div>';
+
+            Swal.fire({
+                title: '<strong>Pesanan Saya</strong>',
+                html: html,
+                showCloseButton: true,
+                width: '500px'
+            });
+        }
+
+        checkStoredOrders();
+
         /* ── 1. SELECT VENDOR ──────────────────── */
         $('#select_vendor').on('change', function () {
             const vendor_id = $(this).val();
@@ -1101,6 +1157,18 @@
         // Tutup modal QR Code
         $('#btnCloseQrModal').on('click', function () {
             $('#qrModal').removeClass('active');
+            // Simpan order ID ke localStorage agar customer bisa akses lagi
+            const pesananId = $('#qrOrderId').text().replace('#', '');
+            if (pesananId && pesananId !== '0') {
+                // Ambil order IDs yang tersimpan sebelumnya
+                let storedOrders = localStorage.getItem('customer_orders');
+                let orders = storedOrders ? JSON.parse(storedOrders) : [];
+                // Tambahkan order ID baru jika belum ada
+                if (!orders.includes(pesananId)) {
+                    orders.push(pesananId);
+                    localStorage.setItem('customer_orders', JSON.stringify(orders));
+                }
+            }
             // Tunggu animasi selesai sebelum reload
             setTimeout(() => {
                 window.location.reload();
@@ -1111,6 +1179,16 @@
         $('#qrModal').on('click', function (e) {
             if (e.target === this) {
                 $(this).removeClass('active');
+                // Simpan order ID juga saat klik overlay
+                const pesananId = $('#qrOrderId').text().replace('#', '');
+                if (pesananId && pesananId !== '0') {
+                    let storedOrders = localStorage.getItem('customer_orders');
+                    let orders = storedOrders ? JSON.parse(storedOrders) : [];
+                    if (!orders.includes(pesananId)) {
+                        orders.push(pesananId);
+                        localStorage.setItem('customer_orders', JSON.stringify(orders));
+                    }
+                }
                 setTimeout(() => {
                     window.location.reload();
                 }, 300);

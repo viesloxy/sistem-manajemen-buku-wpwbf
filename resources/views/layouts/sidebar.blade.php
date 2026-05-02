@@ -183,6 +183,14 @@
                     <i class="mdi mdi-cart-arrow-down menu-icon"></i>
                 </a>
             </li>
+
+            <!-- PRaktikum 2: SCAN QR CODE VENDOR -->
+            <li class="nav-item {{ Request::is('vendor/scan*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('vendor.scan-qr') }}">
+                    <span class="menu-title">Scan QR Pesanan</span>
+                    <i class="mdi mdi-qrcode-scan menu-icon"></i>
+                </a>
+            </li>
         @endif
         <!-- ============================== -->
         <!-- AKHIR MENU KHUSUS VENDOR -->

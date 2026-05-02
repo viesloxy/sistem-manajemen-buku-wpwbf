@@ -14,6 +14,7 @@ use App\Http\Controllers\VendorPesananController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerAccessController;
 use App\Http\Controllers\ScannerBarangController;
+use App\Http\Controllers\VendorScanController;
 
 Auth::routes();
 
@@ -108,6 +109,12 @@ Route::middleware(['auth'])->group(function () {
     // --- PRaktikum 1: SCANNER BARCODE & QR CODE ---
     Route::get('/scanner', [ScannerBarangController::class, 'index'])->name('scanner.index');
     Route::post('/scanner/cek-barang', [ScannerBarangController::class, 'cekBarang'])->name('scanner.cekBarang');
+
+    // --- PRaktikum 2: VENDOR SCAN QR CODE ---
+    Route::prefix('vendor')->name('vendor.')->group(function () {
+        Route::get('/scan-qr', [VendorScanController::class, 'index'])->name('scan-qr');
+        Route::get('/scan/order/{id}', [VendorScanController::class, 'getOrderDetail'])->name('scan.order');
+    });
 
     // --- FITUR VENDOR ---
     Route::prefix('vendor')->name('vendor.')->group(function () {
