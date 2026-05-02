@@ -4,7 +4,7 @@
 <div class="page-header">
     <h3 class="page-title">
         <span class="page-title-icon bg-gradient-primary text-white me-2">
-            <i class="mdi mdi-qrcode-scanner"></i>
+            <i class="mdi mdi-qrcode-scan"></i>
         </span> Scanner Barcode & QR Code
     </h3>
     <nav aria-label="breadcrumb">
@@ -23,11 +23,9 @@
                 <h4 class="card-title">Arahkan Barcode ke Kamera</h4>
                 <p class="card-description">Scan label barang untuk melihat informasi produk</p>
 
+                <!-- Container untuk Html5Qrcode - PENTING: Library inject video di sini -->
                 <div class="text-center mb-4">
-                    <video id="videoScanner" width="100%" autoplay playsinline
-                           style="border: 2px solid #ddd; border-radius: 8px; background: #000; max-width: 480px;">
-                    </video>
-                    <canvas id="canvasScanner" width="480" height="320" style="display: none;"></canvas>
+                    <div id="reader" style="width: 100%; max-width: 480px; margin: 0 auto; border: 2px solid #ddd; border-radius: 8px; overflow: hidden;"></div>
                 </div>
 
                 <div class="text-center mb-3">
@@ -157,8 +155,6 @@
 
 <script>
 $(document).ready(function() {
-    const video = document.getElementById('videoScanner');
-    const canvas = document.getElementById('canvasScanner');
     const btnStartScan = document.getElementById('btnStartScan');
     const btnStopScan = document.getElementById('btnStopScan');
     const btnScanUlang = document.getElementById('btnScanUlang');
@@ -180,7 +176,7 @@ $(document).ready(function() {
     const errorMessage = document.getElementById('errorMessage');
 
     let html5QrCode = null;
-    let stream = null;
+    let isScanning = false;
 
     // Fungsi untuk memutar beep sound
     function playBeep() {
@@ -242,19 +238,31 @@ $(document).ready(function() {
     async function startScanner() {
         resetResult();
 
-        html5QrCode = new Html5Qrcode("videoScanner");
+        // Validasi element ada
+        const readerElement = document.getElementById('reader');
+        if (!readerElement) {
+            alert('Element reader tidak ditemukan!');
+            return;
+        }
+
+        // Inisialisasi Html5Qrcode dengan element container
+        html5QrCode = new Html5Qrcode("reader");
 
         const config = {
             fps: 10,
-            qrbox: { width: 250, height: 100 },
-            aspectRatio: 1.5
+            qrbox: { width: 300, height: 150 },
+            aspectRatio: 1.333
         };
 
         try {
+            console.log('Memulai scanner...');
+
             await html5QrCode.start(
                 { facingMode: "environment" },
                 config,
                 (decodedText, decodedResult) => {
+                    console.log('Barcode terdeteksi:', decodedText);
+
                     // Berhenti scan setelah berhasil mendeteksi
                     stopScanner();
 
@@ -277,10 +285,12 @@ $(document).ready(function() {
                     });
                 },
                 (errorMessage) => {
-                    // Error scanning - normal, abaikan
+                    // Error scanning - ini normal, scanning masih berjalan
+                    // console.log('Scanning...');
                 }
             );
 
+            isScanning = true;
             // Update UI
             btnStartScan.style.display = 'none';
             btnStopScan.style.display = 'inline-block';
@@ -297,8 +307,9 @@ $(document).ready(function() {
 
     // Fungsi untuk menghentikan scanner
     function stopScanner() {
-        if (html5QrCode) {
+        if (html5QrCode && isScanning) {
             html5QrCode.stop().then(() => {
+                isScanning = false;
                 html5QrCode = null;
                 btnStartScan.style.display = 'inline-block';
                 btnStopScan.style.display = 'none';
@@ -315,7 +326,7 @@ $(document).ready(function() {
 
     // Cleanup on page leave
     window.addEventListener('beforeunload', function() {
-        if (html5QrCode) {
+        if (html5QrCode && isScanning) {
             html5QrCode.stop().then(() => {});
         }
     });
