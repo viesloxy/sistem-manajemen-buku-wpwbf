@@ -261,9 +261,8 @@ $(document).ready(function() {
 
     // Fungsi untuk ekstrak ID pesanan dari URL
     function extractPesananId(url) {
-        // Format URL: /pesanan/{id}/verifikasi
-        // Atau bisa langsung ID numerik
-        const match = url.match(/\/pesanan\/(\d+)\/verifikasi/);
+        // Format URL: /pesanan/{id}/verifikasi atau /qrcode/{id}/page
+        const match = url.match(/\/(?:pesanan|qrcode)\/(\d+)/);
         if (match) {
             return match[1];
         }

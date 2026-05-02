@@ -14,7 +14,7 @@ class VendorScanController extends Controller
      */
     public function index()
     {
-        return view('vendor.scan-qr');
+        return view('vendor.scan.index');
     }
 
     /**
