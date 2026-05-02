@@ -175,7 +175,7 @@ class CustomerController extends Controller
     // 7. Verifikasi Pesanan (bisa diakses via QR Code)
     public function verifyPesanan($id)
     {
-        $pesanan = Pesanan::with(['details.menu', 'details.menu.vendor'])->find($id);
+        $pesanan = Pesanan::with(['detailPesanans.menu', 'detailPesanans.menu.vendor'])->find($id);
 
         if (!$pesanan) {
             return view('customer.verify', ['status' => 'error', 'message' => 'Pesanan tidak ditemukan']);

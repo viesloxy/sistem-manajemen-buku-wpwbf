@@ -177,12 +177,12 @@
                     </span>
                 </div>
 
-                @if($pesanan->details && $pesanan->details->count() > 0)
+                @if($pesanan->detailPesanans && $pesanan->detailPesanans->count() > 0)
                 <div class="items-list">
                     <div class="item-row" style="font-weight:700; color:#6d28d9; margin-bottom:.5rem;">
                         <span>Item Pesanan</span>
                     </div>
-                    @foreach($pesanan->details as $detail)
+                    @foreach($pesanan->detailPesanans as $detail)
                     <div class="item-row">
                         <span class="item-name">{{ $detail->menu->nama_menu ?? 'Menu' }}</span>
                         <span class="item-qty">×{{ $detail->jumlah }}</span>

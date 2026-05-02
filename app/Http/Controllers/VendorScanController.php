@@ -22,7 +22,7 @@ class VendorScanController extends Controller
      */
     public function getOrderDetail($id)
     {
-        $pesanan = Pesanan::with(['details.menu.vendor'])->find($id);
+        $pesanan = Pesanan::with(['detailPesanans.menu.vendor'])->find($id);
 
         if (!$pesanan) {
             return response()->json([
@@ -35,7 +35,7 @@ class VendorScanController extends Controller
         $menus = [];
         $totalAmount = 0;
 
-        foreach ($pesanan->details as $detail) {
+        foreach ($pesanan->detailPesanans as $detail) {
             if ($detail->menu && $detail->menu->vendor) {
                 $menus[] = [
                     'nama' => $detail->menu->nama_menu,
