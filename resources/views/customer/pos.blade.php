@@ -964,7 +964,7 @@
                                 <button class="btn btn-sm btn-outline-secondary" onclick="window.open('/pesanan/${orderId}/verifikasi', '_blank')">
                                     <i class="mdi mdi-eye"></i> Detail
                                 </button>
-                                <button class="btn btn-sm btn-primary" onclick="window.open('/qrcode/${orderId}', '_blank')">
+                                <button class="btn btn-sm btn-primary" onclick="window.open('/qrcode/${orderId}/page', '_blank')">
                                     <i class="mdi mdi-qrcode"></i> Lihat QR
                                 </button>
                             </div>

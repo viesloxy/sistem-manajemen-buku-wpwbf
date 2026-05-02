@@ -44,6 +44,9 @@ Route::post('/midtrans/callback', [CustomerController::class, 'midtransCallback'
 // QR Code API (tanpa auth - untuk modal popup setelah pembayaran)
 Route::get('/qrcode/{id}', [CustomerController::class, 'generateQRCode'])->name('customer.qrcode');
 
+// QR Code Page (dengan layout, untuk customer lihat QR)
+Route::get('/qrcode/{id}/page', [CustomerController::class, 'showQrPage'])->name('customer.qrcode.page');
+
 // Verifikasi Pesanan via QR Code
 Route::get('/pesanan/{id}/verifikasi', [CustomerController::class, 'verifyPesanan'])->name('customer.verify');
 

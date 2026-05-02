@@ -186,4 +186,18 @@ class CustomerController extends Controller
             'pesanan' => $pesanan
         ]);
     }
+
+    // 8. Tampilkan Halaman QR Code dengan Layout
+    public function showQrPage($id)
+    {
+        $pesanan = Pesanan::find($id);
+
+        if (!$pesanan) {
+            return redirect()->route('customer.pos')->with('error', 'Pesanan tidak ditemukan');
+        }
+
+        return view('customer.show-qr', [
+            'pesanan_id' => $id
+        ]);
+    }
 }
