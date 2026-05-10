@@ -15,6 +15,8 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerAccessController;
 use App\Http\Controllers\ScannerBarangController;
 use App\Http\Controllers\VendorScanController;
+use App\Http\Controllers\GeolocationController;
+use App\Http\Controllers\BarcodeController;
 
 Auth::routes();
 
@@ -123,5 +125,45 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('vendor')->name('vendor.')->group(function () {
         Route::resource('menu', VendorMenuController::class);
         Route::get('pesanan', [VendorPesananController::class, 'index'])->name('pesanan.index');
+    });
+
+    // ========================================================================
+    // GEOLOCATION MODULE
+    // ========================================================================
+
+    // Admin Geolocation Routes
+    Route::prefix('geolocation')->name('geolocation.')->group(function () {
+        Route::get('/map', [GeolocationController::class, 'map'])->name('map');
+        Route::get('/list', [GeolocationController::class, 'list'])->name('list');
+        Route::get('/create', [GeolocationController::class, 'create'])->name('create');
+        Route::post('/', [GeolocationController::class, 'store'])->name('store');
+        Route::delete('/{id}', [GeolocationController::class, 'destroy'])->name('destroy');
+
+        // Admin Barcode Routes
+        Route::prefix('barcode')->name('barcode.')->group(function () {
+            Route::get('/', [BarcodeController::class, 'adminIndex'])->name('index');
+            Route::get('/create', [BarcodeController::class, 'create'])->name('create');
+            Route::post('/', [BarcodeController::class, 'store'])->name('store');
+            Route::get('/{id}/edit', [BarcodeController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [BarcodeController::class, 'update'])->name('update');
+            Route::delete('/{id}', [BarcodeController::class, 'destroy'])->name('destroy');
+            Route::get('/print/{id}', [BarcodeController::class, 'print'])->name('print');
+        });
+    });
+
+    // Vendor Geolocation Routes
+    Route::prefix('vendor/geolocation')->name('vendor.geolocation.')->group(function () {
+        Route::get('/titik-awal', [GeolocationController::class, 'titikAwal'])->name('titik-awal');
+        Route::get('/titik-kunjungan', [GeolocationController::class, 'titikKunjungan'])->name('titik-kunjungan');
+        Route::post('/store', [GeolocationController::class, 'vendorStore'])->name('store');
+    });
+
+    // API Routes
+    Route::prefix('api')->group(function () {
+        Route::get('/geolocation', [GeolocationController::class, 'apiIndex']);
+        Route::get('/geolocation-by-vendor', [GeolocationController::class, 'apiIndexByVendor']);
+        Route::post('/geolocation', [GeolocationController::class, 'apiStore']);
+        Route::get('/barcodes', [BarcodeController::class, 'index']);
+        Route::get('/barcodes/{barcode}', [BarcodeController::class, 'show']);
     });
 });
