@@ -157,6 +157,54 @@
                     <i class="mdi mdi-qrcode-scan menu-icon"></i>
                 </a>
             </li>
+
+            <!-- MODUL 9: GEOLOCATION -->
+            <li class="nav-item {{ Request::is('geolocation*') || Request::is('vendor/geolocation*') ? 'active' : '' }}">
+                <a class="nav-link" data-bs-toggle="collapse" href="#geolocation-menu" aria-expanded="{{ Request::is('geolocation*') || Request::is('vendor/geolocation*') ? 'true' : 'false' }}" aria-controls="geolocation-menu">
+                    <span class="menu-title">Geolocation</span>
+                    <i class="menu-arrow"></i>
+                    <i class="mdi mdi-map-marker-radius menu-icon"></i>
+                </a>
+                <div class="collapse {{ Request::is('geolocation*') || Request::is('vendor/geolocation*') ? 'show' : '' }}" id="geolocation-menu">
+                    <ul class="nav flex-column sub-menu">
+                        <li class="nav-item">
+                            <a class="nav-link {{ Request::is('geolocation/map') ? 'active' : '' }}" href="{{ route('geolocation.map') }}">
+                                <i class="mdi mdi-map"></i> Peta
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ Request::is('geolocation/list') ? 'active' : '' }}" href="{{ route('geolocation.list') }}">
+                                <i class="mdi mdi-format-list-bulleted"></i> Daftar Lokasi
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ Request::is('geolocation/create') ? 'active' : '' }}" href="{{ route('geolocation.create') }}">
+                                <i class="mdi mdi-plus-circle"></i> Tambah Lokasi
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ Request::is('geolocation/barcode*') ? 'active' : '' }}" data-bs-toggle="collapse" href="#barcode-submenu" aria-expanded="{{ Request::is('geolocation/barcode*') ? 'true' : 'false' }}">
+                                <i class="mdi mdi-barcode"></i> Master Barcode
+                                <i class="mdi mdi-chevron-down" style="margin-left: auto;"></i>
+                            </a>
+                            <div class="collapse {{ Request::is('geolocation/barcode*') ? 'show' : '' }}" id="barcode-submenu">
+                                <ul class="nav flex-column sub-menu" style="margin-left: 15px;">
+                                    <li class="nav-item">
+                                        <a class="nav-link {{ Request::is('geolocation/barcode') && !Request::is('geolocation/barcode/create') && !Request::is('geolocation/barcode/*/edit') ? 'active' : '' }}" href="{{ route('geolocation.barcode.index') }}">
+                                            <i class="mdi mdi-format-list-bulleted"></i> Daftar Barcode
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link {{ Request::is('geolocation/barcode/create') ? 'active' : '' }}" href="{{ route('geolocation.barcode.create') }}">
+                                            <i class="mdi mdi-plus"></i> Tambah Barcode
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </li>
         @endif
         <!-- ============================== -->
         <!-- AKHIR MENU KHUSUS ADMIN -->
@@ -190,6 +238,29 @@
                     <span class="menu-title">Scan QR Pesanan</span>
                     <i class="mdi mdi-qrcode-scan menu-icon"></i>
                 </a>
+            </li>
+
+            <!-- MODUL 9: GEOLOCATION (VENDOR) -->
+            <li class="nav-item {{ Request::is('vendor/geolocation*') ? 'active' : '' }}">
+                <a class="nav-link" data-bs-toggle="collapse" href="#geolocation-vendor-menu" aria-expanded="{{ Request::is('vendor/geolocation*') ? 'true' : 'false' }}" aria-controls="geolocation-vendor-menu">
+                    <span class="menu-title">Geolocation</span>
+                    <i class="menu-arrow"></i>
+                    <i class="mdi mdi-map-marker-radius menu-icon"></i>
+                </a>
+                <div class="collapse {{ Request::is('vendor/geolocation*') ? 'show' : '' }}" id="geolocation-vendor-menu">
+                    <ul class="nav flex-column sub-menu">
+                        <li class="nav-item">
+                            <a class="nav-link {{ Request::is('vendor/geolocation/titik-awal') ? 'active' : '' }}" href="{{ route('vendor.geolocation.titik-awal') }}">
+                                <i class="mdi mdi-play-circle"></i> Input Titik Awal
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ Request::is('vendor/geolocation/titik-kunjungan') ? 'active' : '' }}" href="{{ route('vendor.geolocation.titik-kunjungan') }}">
+                                <i class="mdi mdi-qrcode-scan"></i> Titik Kunjungan
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </li>
         @endif
         <!-- ============================== -->
