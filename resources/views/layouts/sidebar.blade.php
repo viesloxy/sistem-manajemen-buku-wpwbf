@@ -169,41 +169,29 @@
                     <ul class="nav flex-column sub-menu">
                         <li class="nav-item">
                             <a class="nav-link {{ Request::is('geolocation/map') ? 'active' : '' }}" href="{{ route('geolocation.map') }}">
-                                <i class="mdi mdi-map"></i> Peta
+                                Peta
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ Request::is('geolocation/list') ? 'active' : '' }}" href="{{ route('geolocation.list') }}">
-                                <i class="mdi mdi-format-list-bulleted"></i> Daftar Lokasi
+                                Daftar Lokasi
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ Request::is('geolocation/create') ? 'active' : '' }}" href="{{ route('geolocation.create') }}">
-                                <i class="mdi mdi-plus-circle"></i> Tambah Lokasi
+                                Tambah Lokasi
                             </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {{ Request::is('geolocation/barcode*') ? 'active' : '' }}" data-bs-toggle="collapse" href="#barcode-submenu" aria-expanded="{{ Request::is('geolocation/barcode*') ? 'true' : 'false' }}">
-                                <i class="mdi mdi-barcode"></i> Master Barcode
-                                <i class="mdi mdi-chevron-down" style="margin-left: auto;"></i>
-                            </a>
-                            <div class="collapse {{ Request::is('geolocation/barcode*') ? 'show' : '' }}" id="barcode-submenu">
-                                <ul class="nav flex-column sub-menu" style="margin-left: 15px;">
-                                    <li class="nav-item">
-                                        <a class="nav-link {{ Request::is('geolocation/barcode') && !Request::is('geolocation/barcode/create') && !Request::is('geolocation/barcode/*/edit') ? 'active' : '' }}" href="{{ route('geolocation.barcode.index') }}">
-                                            <i class="mdi mdi-format-list-bulleted"></i> Daftar Barcode
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link {{ Request::is('geolocation/barcode/create') ? 'active' : '' }}" href="{{ route('geolocation.barcode.create') }}">
-                                            <i class="mdi mdi-plus"></i> Tambah Barcode
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
                         </li>
                     </ul>
                 </div>
+            </li>
+
+            <!-- MASTER BARCODE (Sidebar Terpisah) -->
+            <li class="nav-item {{ Request::is('geolocation/barcode*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('geolocation.barcode.index') }}">
+                    <span class="menu-title">Master Barcode</span>
+                    <i class="mdi mdi-barcode menu-icon"></i>
+                </a>
             </li>
         @endif
         <!-- ============================== -->
@@ -251,12 +239,12 @@
                     <ul class="nav flex-column sub-menu">
                         <li class="nav-item">
                             <a class="nav-link {{ Request::is('vendor/geolocation/titik-awal') ? 'active' : '' }}" href="{{ route('vendor.geolocation.titik-awal') }}">
-                                <i class="mdi mdi-play-circle"></i> Input Titik Awal
+                                Input Titik Awal
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ Request::is('vendor/geolocation/titik-kunjungan') ? 'active' : '' }}" href="{{ route('vendor.geolocation.titik-kunjungan') }}">
-                                <i class="mdi mdi-qrcode-scan"></i> Titik Kunjungan
+                                Titik Kunjungan
                             </a>
                         </li>
                     </ul>

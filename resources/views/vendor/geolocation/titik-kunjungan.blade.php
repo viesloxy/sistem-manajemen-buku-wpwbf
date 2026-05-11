@@ -2,26 +2,16 @@
 
 @extends('layouts.app')
 
-@section('title', 'Titik Kunjungan')
-
 @push('styles')
 <link rel="stylesheet" href="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.css" />
 <style>
-    .scanner-box {
-        border: 3px dashed #667eea;
-        border-radius: 15px;
-        padding: 20px;
+    .scanner-container {
         text-align: center;
-        background: #f8f9ff;
         margin-bottom: 20px;
     }
-    .scanner-box.active {
-        border-color: #28a745;
-        background: #f0fff4;
-    }
     .data-card {
-        border-left: 4px solid #667eea;
-        background: #f8f9ff;
+        border-left: 4px solid #6610f2;
+        background: #f8f7ff;
         padding: 15px;
         border-radius: 8px;
         margin-bottom: 15px;
@@ -39,65 +29,86 @@
         background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
         color: white;
     }
-    .beep-indicator {
-        display: inline-block;
-        width: 12px;
-        height: 12px;
-        background: #dc3545;
-        border-radius: 50%;
-        animation: blink 1s infinite;
-    }
-    @keyframes blink {
-        50% { opacity: 0.3; }
-    }
-    .camera-icon {
-        font-size: 48px;
-        color: #667eea;
-        margin-bottom: 10px;
+    #reader {
+        width: 100%;
+        max-width: 480px;
+        margin: 0 auto;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
     }
 </style>
 @endpush
 
 @section('content')
-<div class="container-fluid">
-    {{-- Alert --}}
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
+<div class="page-header">
+    <h3 class="page-title">
+        <span class="page-title-icon bg-gradient-primary text-white me-2">
+            <i class="mdi mdi-qrcode-scan"></i>
+        </span> Titik Kunjungan
+    </h3>
+    <nav aria-label="breadcrumb">
+        <ul class="breadcrumb">
+            <li class="breadcrumb-item active" aria-current="page">
+                <span></span>Scan barcode & validasi lokasi <i class="mdi mdi-alert-circle-outline icon-sm text-primary align-middle"></i>
+            </li>
+        </ul>
+    </nav>
+</div>
 
-    {{-- Card: Scanner Barcode --}}
-    <div class="card mb-3">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0"><i class="fas fa-barcode"></i> Scan Barcode Toko</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="scanner-box" id="scanner-container">
-                        <div class="camera-icon">
-                            <i class="fas fa-camera"></i>
-                        </div>
-                        <h5>Arahkan Kamera ke Barcode</h5>
-                        <p class="text-muted">Klik tombol "Mulai Scan" untuk membuka kamera</p>
-                        <button type="button" id="btn-start-scan" class="btn btn-primary btn-lg">
-                            <i class="fas fa-camera"></i> Mulai Scan
-                        </button>
-                        <button type="button" id="btn-stop-scan" class="btn btn-danger btn-lg" style="display: none;">
-                            <i class="fas fa-stop"></i> Stop Scan
-                        </button>
-                    </div>
-                    <div id="reader" style="width: 100%; display: none;"></div>
+{{-- Success Alert --}}
+@if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="mdi mdi-check-circle"></i> {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
+{{-- Scanner Card --}}
+<div class="row">
+    <div class="col-lg-8 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title"><i class="mdi mdi-barcode text-primary"></i> Scan Barcode Toko</h4>
+                <p class="card-description">Arahkan barcode ke kamera untuk scan</p>
+                <hr class="mb-4">
+
+                {{-- Scanner Container --}}
+                <div class="scanner-container mb-4">
+                    <div id="reader" style="width: 100%; max-width: 480px; margin: 0 auto; border: 2px solid #ddd; border-radius: 8px; overflow: hidden;"></div>
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label">atau input manual barcode:</label>
-                    <div class="input-group mb-3">
-                        <input type="text" id="barcode-input" class="form-control"
+
+                {{-- Scanner Status --}}
+                <div id="scannerStatus" class="mb-3 text-center">
+                    <span class="badge bg-secondary p-2">
+                        <i class="mdi mdi-camera"></i> Kamera belum aktif
+                    </span>
+                </div>
+
+                {{-- Scanner Buttons --}}
+                <div class="text-center mb-3">
+                    <button type="button" class="btn btn-gradient-primary btn-lg me-2" id="btnStartScan">
+                        <i class="mdi mdi-play"></i> Mulai Scan
+                    </button>
+                    <button type="button" class="btn btn-outline-danger btn-lg" id="btnStopScan" style="display: none;">
+                        <i class="mdi mdi-stop"></i> Stop Scanner
+                    </button>
+                </div>
+
+                {{-- Camera Error --}}
+                <div id="cameraError" class="alert alert-warning mt-3" style="display: none;">
+                    <i class="mdi mdi-alert"></i>
+                    <span id="errorMessage">Tidak dapat mengakses kamera</span>
+                </div>
+
+                {{-- Manual Input --}}
+                <div class="mt-4">
+                    <label class="form-label text-muted small">Atau input manual barcode:</label>
+                    <div class="input-group">
+                        <input type="text" id="barcode-input" class="form-control border-primary"
                                placeholder="Ketik atau scan barcode...">
                         <button type="button" id="btn-cari-barcode" class="btn btn-outline-primary">
-                            <i class="fas fa-search"></i> Cari
+                            <i class="mdi mdi-magnify btn-icon-prepend"></i> Cari
                         </button>
                     </div>
                 </div>
@@ -105,210 +116,259 @@
         </div>
     </div>
 
-    {{-- Card: Data dari DB (Hasil Scan) --}}
-    <div class="card mb-3" id="barcode-data-section" style="display: none;">
-        <div class="card-header bg-info text-white">
-            <h5 class="mb-0"><i class="fas fa-database"></i> Data Toko Target</h5>
-        </div>
-        <div class="card-body">
-            <div class="data-card">
-                <div class="row">
-                    <div class="col-md-4">
-                        <label class="text-muted small">Kode Barcode</label>
-                        <h4 id="barcode-code">-</h4>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="text-muted small">Nama Toko</label>
-                        <h4 id="barcode-nama">-</h4>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="text-muted small">Accuracy Target</label>
-                        <h4 id="barcode-accuracy">-</h4>
-                    </div>
-                </div>
+    {{-- Petunjuk Card --}}
+    <div class="col-lg-4 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title"><i class="mdi mdi-information-outline text-info"></i> Panduan</h4>
+                <hr class="mb-4">
+
+                <h6 class="text-primary"><i class="mdi mdi-barcode"></i> Langkah Scan Barcode</h6>
+                <ol class="small mb-4">
+                    <li>Klik tombol <strong>"Mulai Scan"</strong></li>
+                    <li>Izinkan akses kamera jika diminta</li>
+                    <li>Arahkan barcode ke kamera</li>
+                    <li>Setelah terdeteksi, terdengar <strong>beep</strong></li>
+                    <li>Data toko akan otomatis muncul</li>
+                </ol>
+
                 <hr>
-                <div class="row">
-                    <div class="col-md-3">
-                        <label class="text-muted small">Latitude Target</label>
-                        <p class="mb-0" id="barcode-lat">-</p>
+
+                <h6 class="text-success"><i class="mdi mdi-check-circle"></i> Aturan Validasi</h6>
+                <ul class="small mb-2">
+                    <li><strong>Jarak < Accuracy Target</strong> → <span class="badge badge-success">DITERIMA</span></li>
+                    <li><strong>Jarak ≥ Accuracy Target</strong> → <span class="badge badge-danger">DITOLAK</span></li>
+                </ul>
+                <div class="alert alert-info small mb-0">
+                    <i class="mdi mdi-lightbulb-outline"></i> Contoh: Accuracy = 50m<br>
+                    Jika jarak ≤ 50m → DITERIMA<br>
+                    Jika jarak > 50m → DITOLAK
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Data Toko Card --}}
+<div class="row" id="barcode-data-section" style="display: none;">
+    <div class="col-lg-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title"><i class="mdi mdi-database text-info"></i> Data Toko Target</h4>
+                <div class="data-card">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="text-muted small">Kode Barcode</label>
+                            <h4 id="barcode-code">-</h4>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="text-muted small">Nama Toko</label>
+                            <h4 id="barcode-nama">-</h4>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="text-muted small">Accuracy Target</label>
+                            <h4 id="barcode-accuracy">-</h4>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="text-muted small">Status</label>
+                            <div id="barcode-status-badge"></div>
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <label class="text-muted small">Longitude Target</label>
-                        <p class="mb-0" id="barcode-lng">-</p>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="text-muted small">Distance</label>
-                        <p class="mb-0" id="barcode-distance">-</p>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="text-muted small">Status</label>
-                        <div id="barcode-status-badge"></div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label class="text-muted small">Latitude Target</label>
+                            <p class="mb-0 fw-bold" id="barcode-lat">-</p>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="text-muted small">Longitude Target</label>
+                            <p class="mb-0 fw-bold" id="barcode-lng">-</p>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="text-muted small">Jarak</label>
+                            <p class="mb-0 fw-bold" id="barcode-distance">-</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    {{-- Card: Input Lokasi Kunjungan --}}
-    <div class="card mb-3" id="kunjungan-section" style="display: none;">
-        <div class="card-header bg-warning">
-            <h5 class="mb-0"><i class="fas fa-map-marker-alt"></i> Data Lokasi Kunjungan</h5>
-        </div>
-        <div class="card-body">
-            <form id="formKunjungan">
-                @csrf
-                <input type="hidden" id="selected-barcode" name="barcode_id">
-                <input type="hidden" id="visit-type" name="type" value="titik_kunjungan">
+{{-- Lokasi Kunjungan Card --}}
+<div class="row" id="kunjungan-section" style="display: none;">
+    <div class="col-lg-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title"><i class="mdi mdi-map-marker-radius text-warning"></i> Data Lokasi Kunjungan</h4>
+                <hr class="mb-4">
 
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="mb-3">
-                            <label class="form-label">Latitude <span class="text-danger">*</span></label>
-                            <input type="text" id="visit-latitude" name="latitude"
-                                   class="form-control" readonly required>
+                <form id="formKunjungan">
+                    @csrf
+                    <input type="hidden" id="selected-barcode" name="barcode_id">
+                    <input type="hidden" id="visit-type" name="type" value="titik_kunjungan">
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="visit-latitude">Latitude <span class="text-danger">*</span></label>
+                                <input type="text" id="visit-latitude" name="latitude"
+                                       class="form-control border-primary" readonly required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="visit-longitude">Longitude <span class="text-danger">*</span></label>
+                                <input type="text" id="visit-longitude" name="longitude"
+                                       class="form-control border-primary" readonly required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="visit-accuracy">Accuracy (meter)</label>
+                                <input type="text" id="visit-accuracy" name="accuracy"
+                                       class="form-control border-primary" readonly>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="mb-3">
-                            <label class="form-label">Longitude <span class="text-danger">*</span></label>
-                            <input type="text" id="visit-longitude" name="longitude"
-                                   class="form-control" readonly required>
-                        </div>
+
+                    {{-- Result Status --}}
+                    <div class="result-card mt-3" id="result-status" style="display: none;">
+                        <h3 id="result-status-text">-</h3>
+                        <p id="result-distance"></p>
                     </div>
-                    <div class="col-md-4">
-                        <div class="mb-3">
-                            <label class="form-label">Accuracy (meter)</label>
-                            <input type="text" id="visit-accuracy" name="accuracy"
-                                   class="form-control" readonly>
-                        </div>
+
+                    <div class="mt-4">
+                        <button type="button" id="btn-ambil-lokasi" class="btn btn-gradient-success btn-lg me-2">
+                            <i class="mdi mdi-satellite-variant btn-icon-prepend"></i> Ambil Lokasi Saat Ini
+                        </button>
+                        <button type="submit" id="btn-simpan" class="btn btn-gradient-primary btn-lg" style="display: none;">
+                            <i class="mdi mdi-content-save btn-icon-prepend"></i> Simpan Kunjungan
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-lg" onclick="resetAll()">
+                            <i class="mdi mdi-refresh btn-icon-prepend"></i> Reset / Scan Ulang
+                        </button>
                     </div>
-                </div>
-
-                {{-- Result Status --}}
-                <div class="result-card mt-3" id="result-status" style="display: none;">
-                    <h3 id="result-status-text">-</h3>
-                    <p id="result-distance"></p>
-                </div>
-
-                <div class="mb-3 mt-3">
-                    <button type="button" id="btn-ambil-lokasi" class="btn btn-success btn-lg">
-                        <i class="fas fa-satellite-dish"></i> Ambil Lokasi Saat Ini
-                    </button>
-                    <button type="submit" id="btn-simpan" class="btn btn-primary btn-lg" style="display: none;">
-                        <i class="fas fa-save"></i> Simpan Kunjungan
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary btn-lg ms-2" onclick="resetAll()">
-                        <i class="fas fa-redo"></i> Reset / Scan Ulang
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    {{-- Panduan --}}
-    <div class="card">
-        <div class="card-header bg-secondary text-white">
-            <h5 class="mb-0"><i class="fas fa-book"></i> Panduan Penggunaan</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <h6><i class="fas fa-barcode text-primary"></i> Langkah Scan Barcode</h6>
-                    <ol class="small">
-                        <li>Klik tombol <strong>"Mulai Scan"</strong></li>
-                        <li>Izinkan akses kamera jika diminta</li>
-                        <li>Arahkan barcode ke kamera</li>
-                        <li>Setelah terdeteksi, akan terdengar <strong>beep</strong></li>
-                        <li>Data toko akan otomatis muncul</li>
-                    </ol>
-                </div>
-                <div class="col-md-6">
-                    <h6><i class="fas fa-check-circle text-success"></i> Aturan Validasi</h6>
-                    <ul class="small">
-                        <li><strong>Jarak < Accuracy Target</strong> → <span class="badge bg-success">DITERIMA</span></li>
-                        <li><strong>Jarak ≥ Accuracy Target</strong> → <span class="badge bg-danger">DITOLAK</span></li>
-                    </ul>
-                    <p class="small text-muted">
-                        Contoh: Accuracy Target = 50 meter<br>
-                        Jika jarak Anda ke toko ≤ 50 meter → DITERIMA<br>
-                        Jika jarak > 50 meter → DITOLAK
-                    </p>
-                </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
 @endsection
 
-@push('scripts')
-{{-- Html5-qrcode Library --}}
+@section('javascript-page')
+<!-- Html5-qrcode Library -->
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
 <script>
-    let html5QrCode;
+$(document).ready(function() {
+    const btnStartScan = document.getElementById('btnStartScan');
+    const btnStopScan = document.getElementById('btnStopScan');
+    const scannerStatus = document.getElementById('scannerStatus');
+    const cameraError = document.getElementById('cameraError');
+
+    let html5QrCode = null;
     let isScanning = false;
 
-    // Audio beep function
+    // Fungsi untuk memutar beep sound
     function playBeep() {
-        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleQYMRaTR44pEIghTmtnXrHoKFDuV1tyyZBgQJZTX4bNmGRE/l9rjtHEkGimV2N66ZyAVMZPW5LhxKhczmNTiu3UsHziX1+S8eDIjOpjW5b57NCc+nNjkvX00JTya1+S/fzQpQJzY5cB/NCxDoNjkwn81Lkah2eXDgDUwSKPZ5cSAVjFKptnmxYRWMk2p2efGhVgzTqrZ58eGWDNQrdroxoZYNFKu2unIhVoyU7Db6smJWTJVs93ry4paNVW13uzLi181VrXi78yMXzZYt+LuzJBgOVq44+/NjmI7X7vm8M6RYT1hu+fzz5RkPmO86PLPlmY+Y77q8s+WZz9kvuzyz5dnP2S/7PLPl2c/ZMDs8s+XaD9kwO3yz5doP2TA7vLP+9g=');
-        audio.play().catch(e => console.log('Beep audio not supported'));
+        const audio = new Audio('{{ asset("sounds/notification.mp3") }}');
+        audio.currentTime = 0;
+        audio.play().catch(e => console.log('Audio play failed:', e));
     }
 
-    // Start Scanner
-    document.getElementById('btn-start-scan').addEventListener('click', function() {
+    // Fungsi untuk reset scanner
+    function resetScanner() {
+        if (html5QrCode && isScanning) {
+            html5QrCode.stop().then(() => {
+                isScanning = false;
+                html5QrCode = null;
+            }).catch(err => console.error("Error stopping scanner:", err));
+        }
+        btnStartScan.style.display = 'inline-block';
+        btnStopScan.style.display = 'none';
+        scannerStatus.innerHTML = '<span class="badge bg-secondary p-2"><i class="mdi mdi-camera"></i> Kamera belum aktif</span>';
+    }
+
+    // Fungsi untuk memulai scanner
+    async function startScanner() {
+        const readerElement = document.getElementById('reader');
+        if (!readerElement) {
+            alert('Element reader tidak ditemukan!');
+            return;
+        }
+
         html5QrCode = new Html5Qrcode("reader");
 
         const config = {
             fps: 10,
-            qrbox: { width: 250, height: 250 },
-            aspectRatio: 1.0
+            qrbox: { width: 300, height: 150 },
+            aspectRatio: 1.333
         };
 
-        html5QrCode.start(
-            { facingMode: "environment" },
-            config,
-            (decodedText) => {
-                // 1. Bunyi beep
-                playBeep();
+        try {
+            console.log('Memulai scanner...');
 
-                // 2. Stop scanner
-                stopScanner();
+            await html5QrCode.start(
+                { facingMode: "environment" },
+                config,
+                (decodedText, decodedResult) => {
+                    console.log('Barcode terdeteksi:', decodedText);
 
-                // 3. Isi barcode input
-                document.getElementById('barcode-input').value = decodedText;
+                    // Berhenti scan setelah berhasil mendeteksi
+                    stopScanner();
 
-                // 4. Fetch data
-                fetchBarcodeData(decodedText);
-            },
-            (errorMessage) => {
-                // Scanning in progress...
-            }
-        ).then(() => {
+                    // Mainkan beep sound
+                    playBeep();
+
+                    // Set value dan fetch data
+                    document.getElementById('barcode-input').value = decodedText;
+                    fetchBarcodeData(decodedText);
+                },
+                (errorMessage) => {
+                    // Error scanning - ini normal, scanning masih berjalan
+                    // console.log('Scanning...');
+                }
+            );
+
             isScanning = true;
-            document.getElementById('reader').style.display = 'block';
-            document.getElementById('btn-start-scan').style.display = 'none';
-            document.getElementById('btn-stop-scan').style.display = 'inline-block';
-            document.getElementById('scanner-container').classList.add('active');
-        }).catch((err) => {
-            alert('Kamera tidak tersedia atau tidak diizinkan: ' + err);
-        });
-    });
+            // Update UI
+            btnStartScan.style.display = 'none';
+            btnStopScan.style.display = 'inline-block';
+            scannerStatus.innerHTML = '<span class="badge bg-success p-2"><i class="mdi mdi-record"></i> Scanner Aktif</span>';
+            cameraError.style.display = 'none';
 
-    // Stop Scanner
+        } catch (err) {
+            console.error("Error starting scanner:", err);
+            cameraError.style.display = 'block';
+            document.getElementById('errorMessage').textContent = 'Gagal mengakses kamera: ' + err.message;
+        }
+    }
+
+    // Fungsi untuk menghentikan scanner
     function stopScanner() {
         if (html5QrCode && isScanning) {
             html5QrCode.stop().then(() => {
                 isScanning = false;
-                document.getElementById('reader').style.display = 'none';
-                document.getElementById('btn-start-scan').style.display = 'inline-block';
-                document.getElementById('btn-stop-scan').style.display = 'none';
-                document.getElementById('scanner-container').classList.remove('active');
-            });
+                btnStartScan.style.display = 'inline-block';
+                btnStopScan.style.display = 'none';
+                scannerStatus.innerHTML = '<span class="badge bg-secondary p-2"><i class="mdi mdi-camera-off"></i> Scanner Berhenti</span>';
+            }).catch(err => console.error("Error stopping scanner:", err));
         }
     }
 
-    document.getElementById('btn-stop-scan').addEventListener('click', stopScanner);
+    // Event listeners untuk scanner
+    btnStartScan.addEventListener('click', startScanner);
+    btnStopScan.addEventListener('click', stopScanner);
 
-    // Fetch barcode data (from API)
+    // Cleanup on page leave
+    window.addEventListener('beforeunload', function() {
+        if (html5QrCode && isScanning) {
+            html5QrCode.stop().then(() => {});
+        }
+    });
+
+    // Fetch barcode data
     function fetchBarcodeData(barcode) {
         fetch(`/api/barcodes/${encodeURIComponent(barcode)}`)
             .then(response => response.json())
@@ -326,7 +386,6 @@
             });
     }
 
-    // Manual barcode input
     document.getElementById('btn-cari-barcode').addEventListener('click', function() {
         const barcode = document.getElementById('barcode-input').value.trim();
         if (barcode) {
@@ -358,7 +417,7 @@
 
         const btn = this;
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengambil lokasi...';
+        btn.innerHTML = '<i class="mdi mdi-loading mdi-spin btn-icon-prepend"></i> Mengambil lokasi...';
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -371,25 +430,20 @@
                     document.getElementById('visit-longitude').value = lng;
                     document.getElementById('visit-accuracy').value = acc;
 
-                    // Ambil data target dari barcode
                     const targetLat = parseFloat(document.getElementById('barcode-lat').textContent);
                     const targetLng = parseFloat(document.getElementById('barcode-lng').textContent);
                     const accuracyTarget = parseFloat(document.getElementById('barcode-accuracy').textContent);
 
-                    // Hitung jarak (Haversine formula)
                     const distance = calculateDistance(lat, lng, targetLat, targetLng);
                     const status = distance <= accuracyTarget ? 'diterima' : 'ditolak';
 
-                    // Update UI
                     document.getElementById('barcode-distance').textContent = Math.round(distance) + ' meter';
 
-                    // Badge status
-                    const badgeClass = status === 'diterima' ? 'bg-success' : 'bg-danger';
+                    const badgeClass = status === 'diterima' ? 'badge-success' : 'badge-danger';
                     const badgeText = status === 'diterima' ? 'DITERIMA' : 'DITOLAK';
                     document.getElementById('barcode-status-badge').innerHTML =
                         `<span class="badge ${badgeClass}">${badgeText}</span>`;
 
-                    // Result card
                     const resultCard = document.getElementById('result-status');
                     resultCard.style.display = 'block';
                     resultCard.className = 'result-card ' + status;
@@ -398,30 +452,14 @@
                     document.getElementById('result-distance').textContent =
                         `Jarak: ${Math.round(distance)} meter (Batas: ${accuracyTarget} meter)`;
 
-                    // Show submit button
                     btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-check"></i> Lokasi Terdeteksi!';
+                    btn.innerHTML = '<i class="mdi mdi-check btn-icon-prepend"></i> Lokasi Terdeteksi!';
                     document.getElementById('btn-simpan').style.display = 'inline-block';
                 },
                 function(error) {
                     btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-satellite-dish"></i> Ambil Lokasi Saat Ini';
-
-                    let errorMsg = 'Tidak dapat mendapatkan lokasi: ';
-                    switch(error.code) {
-                        case error.PERMISSION_DENIED:
-                            errorMsg += 'Izin ditolak';
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            errorMsg += 'Lokasi tidak tersedia';
-                            break;
-                        case error.TIMEOUT:
-                            errorMsg += 'Waktu habis';
-                            break;
-                        default:
-                            errorMsg += error.message;
-                    }
-                    alert(errorMsg);
+                    btn.innerHTML = '<i class="mdi mdi-satellite-variant btn-icon-prepend"></i> Ambil Lokasi Saat Ini';
+                    alert('Tidak dapat mendapatkan lokasi: ' + error.message);
                 },
                 {
                     enableHighAccuracy: true,
@@ -431,14 +469,14 @@
             );
         } else {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-satellite-dish"></i> Ambil Lokasi Saat Ini';
+            btn.innerHTML = '<i class="mdi mdi-satellite-variant btn-icon-prepend"></i> Ambil Lokasi Saat Ini';
             alert('Geolocation tidak didukung browser ini.');
         }
     });
 
-    // Haversine formula untuk menghitung jarak
+    // Haversine formula
     function calculateDistance(lat1, lng1, lat2, lng2) {
-        const R = 6371000; // Radius bumi dalam meter
+        const R = 6371000;
         const dLat = toRad(lat2 - lat1);
         const dLng = toRad(lng2 - lng1);
         const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -457,8 +495,6 @@
         e.preventDefault();
 
         const formData = new FormData(this);
-
-        // Ambil status dari result
         const statusText = document.getElementById('result-status-text').textContent;
         const status = statusText.includes('DITERIMA') ? 'diterima' : 'ditolak';
         formData.append('status', status);
@@ -493,8 +529,9 @@
         document.getElementById('result-status').style.display = 'none';
         document.getElementById('btn-simpan').style.display = 'none';
         document.getElementById('btn-ambil-lokasi').disabled = false;
-        document.getElementById('btn-ambil-lokasi').innerHTML = '<i class="fas fa-satellite-dish"></i> Ambil Lokasi Saat Ini';
-        stopScanner();
+        document.getElementById('btn-ambil-lokasi').innerHTML = '<i class="mdi mdi-satellite-variant btn-icon-prepend"></i> Ambil Lokasi Saat Ini';
+        resetScanner();
     }
+});
 </script>
-@endpush
+@endsection

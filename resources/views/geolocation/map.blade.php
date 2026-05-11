@@ -2,51 +2,93 @@
 
 @extends('layouts.app')
 
-@section('title', 'Peta Lokasi')
-
 @push('styles')
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        #map { height: 500px; width: 100%; }
-        .legend { line-height: 1.5; }
+        #map { height: 450px; width: 100%; border-radius: 10px; }
+        .map-legend span { margin-right: 15px; }
     </style>
 @endpush
 
 @section('content')
-    <div class="container-fluid">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Peta Lokasi Sales</h5>
-                <div>
-                    <select id="filter-vendor" class="form-select form-select-sm d-inline-block w-auto me-2">
-                        <option value="">Semua Vendor</option>
-                        @foreach($vendors as $vendor)
-                            <option value="{{ $vendor->id }}">{{ $vendor->name }}</option>
-                        @endforeach
-                    </select>
-                    <select id="filter-status" class="form-select form-select-sm d-inline-block w-auto">
-                        <option value="">Semua Status</option>
-                        <option value="titik_awal">Titik Awal</option>
-                        <option value="diterima">Diterima</option>
-                        <option value="ditolak">Ditolak</option>
-                    </select>
-                </div>
-            </div>
-            <div class="card-body">
-                <div id="map"></div>
+<div class="page-header">
+    <h3 class="page-title">
+        <span class="page-title-icon bg-gradient-primary text-white me-2">
+            <i class="mdi mdi-map"></i>
+        </span> Peta Lokasi Sales
+    </h3>
+    <nav aria-label="breadcrumb">
+        <ul class="breadcrumb">
+            <li class="breadcrumb-item active" aria-current="page">
+                <span></span>Peta interaktif lokasi vendor <i class="mdi mdi-alert-circle-outline icon-sm text-primary align-middle"></i>
+            </li>
+        </ul>
+    </nav>
+</div>
 
-                {{-- Legenda --}}
-                <div class="mt-3">
-                    <span class="me-3"><i class="fas fa-map-marker-alt text-primary"></i> Titik Awal</span>
-                    <span class="me-3"><i class="fas fa-map-marker-alt text-success"></i> Diterima</span>
-                    <span class="me-3"><i class="fas fa-map-marker-alt text-danger"></i> Ditolak</span>
-                    <button id="btn-print-map" class="btn btn-sm btn-info float-end">
-                        <i class="fas fa-print"></i> Cetak Peta
-                    </button>
+{{-- Filter Card --}}
+<div class="row mb-3">
+    <div class="col-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-3">
+                        <label class="small text-muted">Filter Vendor</label>
+                        <select id="filter-vendor" class="form-select form-select-sm">
+                            <option value="">Semua Vendor</option>
+                            @foreach($vendors as $vendor)
+                                <option value="{{ $vendor->id }}">{{ $vendor->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="small text-muted">Filter Status</label>
+                        <select id="filter-status" class="form-select form-select-sm">
+                            <option value="">Semua Status</option>
+                            <option value="titik_awal">Titik Awal</option>
+                            <option value="diterima">Diterima</option>
+                            <option value="ditolak">Ditolak</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="small text-muted">&nbsp;</label>
+                        <button type="button" id="btn-filter" class="btn btn-gradient-primary btn-sm w-100">
+                            <i class="mdi mdi-filter btn-icon-prepend"></i> Tampilkan
+                        </button>
+                    </div>
+                    <div class="col-md-3 text-end">
+                        <div class="map-legend">
+                            <span class="me-2"><i class="mdi mdi-map-marker text-primary"></i> Titik Awal</span>
+                            <span class="me-2"><i class="mdi mdi-map-marker text-success"></i> Diterima</span>
+                            <span class="me-2"><i class="mdi mdi-map-marker text-danger"></i> Ditolak</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+{{-- Loading & Info --}}
+<div id="map-info" class="alert alert-info mb-3" style="display: none;">
+    <i class="mdi mdi-information"></i> <span id="info-text"></span>
+</div>
+<div id="map-loading" class="text-center py-3" style="display: none;">
+    <div class="spinner-border text-primary" role="status"></div>
+    <span class="ms-2">Memuat marker...</span>
+</div>
+
+{{-- Map Card --}}
+<div class="row">
+    <div class="col-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Peta Interaktif</h4>
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -68,19 +110,36 @@
         let markers = [];
 
         function loadLocations(vendorId = '', status = '') {
+            // Tampilkan loading
+            document.getElementById('map-loading').style.display = 'block';
+            document.getElementById('map-info').style.display = 'none';
+
             // Hapus marker lama
             markers.forEach(m => map.removeLayer(m));
             markers = [];
 
-            let url = '/api/geolocation';
+            // Gunakan endpoint yang mendukung filter
+            let url = '/api/geolocation-by-vendor';
             let params = [];
             if (vendorId) params.push('vendor_id=' + vendorId);
             if (status) params.push('status=' + status);
             if (params.length) url += '?' + params.join('&');
 
+            console.log('Loading locations from:', url);
+
             fetch(url)
                 .then(response => response.json())
                 .then(data => {
+                    console.log('Locations loaded:', data);
+                    document.getElementById('map-loading').style.display = 'none';
+
+                    if (data.length === 0) {
+                        document.getElementById('map-info').style.display = 'block';
+                        document.getElementById('info-text').textContent =
+                            'Belum ada data lokasi. Silakan pastikan vendor sudah input titik awal atau kunjungan.';
+                        return;
+                    }
+
                     data.forEach(location => {
                         let iconKey = location.type === 'titik_awal' ? 'titik_awal' :
                                       location.status === 'diterima' ? 'diterima' : 'ditolak';
@@ -100,30 +159,34 @@
                         markers.push(marker);
                     });
 
+                    // Zoom ke semua marker
                     if (data.length > 0) {
                         const bounds = L.latLngBounds(data.map(loc => [loc.latitude, loc.longitude]));
                         map.fitBounds(bounds, { padding: [50, 50] });
                     }
+
+                    // Tampilkan info
+                    document.getElementById('map-info').style.display = 'block';
+                    document.getElementById('info-text').textContent =
+                        'Menampilkan ' + data.length + ' marker lokasi';
                 })
-                .catch(error => console.error('Error loading locations:', error));
+                .catch(error => {
+                    console.error('Error loading locations:', error);
+                    document.getElementById('map-loading').style.display = 'none';
+                    document.getElementById('map-info').style.display = 'block';
+                    document.getElementById('info-text').textContent =
+                        'Gagal memuat data. Silakan refresh halaman.';
+                });
         }
 
         // Load semua lokasi saat halaman dimuat
         loadLocations();
 
-        // Filter vendor
-        document.getElementById('filter-vendor').addEventListener('change', function() {
-            loadLocations(this.value, document.getElementById('filter-status').value);
-        });
-
-        // Filter status
-        document.getElementById('filter-status').addEventListener('change', function() {
-            loadLocations(document.getElementById('filter-vendor').value, this.value);
-        });
-
-        // Cetak peta
-        document.getElementById('btn-print-map').addEventListener('click', function() {
-            window.print();
+        // Filter button click
+        document.getElementById('btn-filter').addEventListener('click', function() {
+            const vendorId = document.getElementById('filter-vendor').value;
+            const status = document.getElementById('filter-status').value;
+            loadLocations(vendorId, status);
         });
     </script>
 @endpush

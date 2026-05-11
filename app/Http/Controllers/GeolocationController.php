@@ -166,8 +166,14 @@ class GeolocationController extends Controller
         if ($request->vendor_id) {
             $query->where('user_id', $request->vendor_id);
         }
+
         if ($request->status) {
-            $query->where('status', $request->status);
+            // Filter berdasarkan status atau type
+            if ($request->status === 'titik_awal') {
+                $query->where('type', 'titik_awal');
+            } elseif (in_array($request->status, ['diterima', 'ditolak'])) {
+                $query->where('status', $request->status);
+            }
         }
 
         return response()->json($query->get());
