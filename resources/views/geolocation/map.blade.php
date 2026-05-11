@@ -91,102 +91,190 @@
 </div>
 @endsection
 
-@push('scripts')
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        const map = L.map('map').setView([-2.5489, 118.0149], 5);
+@section('javascript-page')
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+$(document).ready(function() {
+    console.log('=== Map page loaded, initializing... ===');
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
+    const map = L.map('map').setView([-2.5489, 118.0149], 5);
 
-        // Marker icons
-        const icons = {
-            titik_awal: L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/markers/marker-icon-blue.png', iconSize: [25, 41], shadowUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/markers/marker-shadow.png', iconSize: [25, 41], shadowSize: [41, 41] }),
-            diterima: L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/markers/marker-icon-green.png', iconSize: [25, 41], shadowUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/markers/marker-shadow.png', iconSize: [25, 41], shadowSize: [41, 41] }),
-            ditolak: L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/markers/marker-icon-red.png', iconSize: [25, 41], shadowUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/markers/marker-shadow.png', iconSize: [25, 41], shadowSize: [41, 41] })
-        };
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
-        let markers = [];
+    console.log('Map initialized successfully');
 
-        function loadLocations(vendorId = '', status = '') {
-            // Tampilkan loading
-            document.getElementById('map-loading').style.display = 'block';
-            document.getElementById('map-info').style.display = 'none';
+    const icons = {
+        titik_awal: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+            shadowSize: [41, 41]
+        }),
+        diterima: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+            shadowSize: [41, 41]
+        }),
+        ditolak: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+            shadowSize: [41, 41]
+        })
+    };
 
-            // Hapus marker lama
-            markers.forEach(m => map.removeLayer(m));
-            markers = [];
+    let markers = [];
 
-            // Gunakan endpoint yang mendukung filter
-            let url = '/api/geolocation-by-vendor';
-            let params = [];
-            if (vendorId) params.push('vendor_id=' + vendorId);
-            if (status) params.push('status=' + status);
-            if (params.length) url += '?' + params.join('&');
+    function loadLocations(vendorId, status) {
+        vendorId = vendorId || '';
+        status = status || '';
 
-            console.log('Loading locations from:', url);
+        console.log('=== loadLocations called ===');
+        console.log('vendorId:', vendorId);
+        console.log('status:', status);
 
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Locations loaded:', data);
-                    document.getElementById('map-loading').style.display = 'none';
+        document.getElementById('map-loading').style.display = 'block';
+        document.getElementById('map-info').style.display = 'none';
 
-                    if (data.length === 0) {
-                        document.getElementById('map-info').style.display = 'block';
-                        document.getElementById('info-text').textContent =
-                            'Belum ada data lokasi. Silakan pastikan vendor sudah input titik awal atau kunjungan.';
-                        return;
-                    }
+        markers.forEach(function(m) {
+            map.removeLayer(m);
+        });
+        markers = [];
+        console.log('Old markers cleared');
 
-                    data.forEach(location => {
-                        let iconKey = location.type === 'titik_awal' ? 'titik_awal' :
-                                      location.status === 'diterima' ? 'diterima' : 'ditolak';
-
-                        const marker = L.marker([location.latitude, location.longitude], { icon: icons[iconKey] })
-                            .addTo(map);
-
-                        marker.bindPopup(`
-                            <strong>${location.user?.name || 'Unknown'}</strong><br>
-                            <small>Type: ${location.type}</small><br>
-                            <small>Status: ${location.status || '-'}</small><br>
-                            ${location.barcode ? '<small>Barcode: ' + location.barcode + '</small><br>' : ''}
-                            <small>Acc: ${location.accuracy} meter</small><br>
-                            <small>${location.created_at}</small>
-                        `);
-
-                        markers.push(marker);
-                    });
-
-                    // Zoom ke semua marker
-                    if (data.length > 0) {
-                        const bounds = L.latLngBounds(data.map(loc => [loc.latitude, loc.longitude]));
-                        map.fitBounds(bounds, { padding: [50, 50] });
-                    }
-
-                    // Tampilkan info
-                    document.getElementById('map-info').style.display = 'block';
-                    document.getElementById('info-text').textContent =
-                        'Menampilkan ' + data.length + ' marker lokasi';
-                })
-                .catch(error => {
-                    console.error('Error loading locations:', error);
-                    document.getElementById('map-loading').style.display = 'none';
-                    document.getElementById('map-info').style.display = 'block';
-                    document.getElementById('info-text').textContent =
-                        'Gagal memuat data. Silakan refresh halaman.';
-                });
+        let url = '/api/geolocation-by-vendor';
+        let params = [];
+        if (vendorId) {
+            params.push('vendor_id=' + vendorId);
+        }
+        if (status) {
+            params.push('status=' + status);
+        }
+        if (params.length) {
+            url += '?' + params.join('&');
         }
 
-        // Load semua lokasi saat halaman dimuat
-        loadLocations();
+        console.log('Fetching from URL:', url);
 
-        // Filter button click
-        document.getElementById('btn-filter').addEventListener('click', function() {
-            const vendorId = document.getElementById('filter-vendor').value;
-            const status = document.getElementById('filter-status').value;
-            loadLocations(vendorId, status);
-        });
-    </script>
-@endpush
+        fetch(url)
+            .then(function(response) {
+                console.log('Response status:', response.status);
+                console.log('Response OK:', response.ok);
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(function(data) {
+                console.log('=== Data received ===');
+                console.log('Data:', data);
+                console.log('Data type:', typeof data);
+                console.log('Data length:', data.length);
+
+                document.getElementById('map-loading').style.display = 'none';
+
+                if (!data || data.length === 0) {
+                    console.log('No data found');
+                    document.getElementById('map-info').style.display = 'block';
+                    document.getElementById('map-info').className = 'alert alert-warning mb-3';
+                    document.getElementById('info-text').textContent = 'Belum ada data lokasi. Silakan pastikan vendor sudah input titik awal atau kunjungan.';
+                    return;
+                }
+
+                console.log('Processing', data.length, 'locations...');
+
+                data.forEach(function(location, index) {
+                    console.log('Location', index, ':', location);
+
+                    let iconKey = 'ditolak';
+                    if (location.type === 'titik_awal') {
+                        iconKey = 'titik_awal';
+                    } else if (location.status === 'diterima') {
+                        iconKey = 'diterima';
+                    }
+
+                    console.log('Icon key:', iconKey);
+
+                    try {
+                        const marker = L.marker([location.latitude, location.longitude], {
+                            icon: icons[iconKey]
+                        }).addTo(map);
+
+                        let userName = 'Unknown';
+                        if (location.user && location.user.name) {
+                            userName = location.user.name;
+                        }
+
+                        let popupContent = '<strong>' + userName + '</strong><br>';
+                        popupContent += '<small>Type: ' + location.type + '</small><br>';
+                        popupContent += '<small>Status: ' + (location.status || '-') + '</small><br>';
+                        if (location.barcode) {
+                            popupContent += '<small>Barcode: ' + location.barcode + '</small><br>';
+                        }
+                        popupContent += '<small>Acc: ' + (location.accuracy || 'N/A') + ' meter</small><br>';
+                        popupContent += '<small>' + location.created_at + '</small>';
+
+                        marker.bindPopup(popupContent);
+
+                        markers.push(marker);
+                        console.log('Marker', index, 'added successfully');
+                    } catch (e) {
+                        console.error('Error adding marker', index, ':', e);
+                    }
+                });
+
+                console.log('Total markers added:', markers.length);
+
+                if (data.length > 0) {
+                    try {
+                        const bounds = L.latLngBounds(data.map(function(loc) {
+                            return [loc.latitude, loc.longitude];
+                        }));
+                        map.fitBounds(bounds, { padding: [50, 50] });
+                        console.log('Map bounds adjusted');
+                    } catch (e) {
+                        console.error('Error adjusting bounds:', e);
+                    }
+                }
+
+                document.getElementById('map-info').style.display = 'block';
+                document.getElementById('map-info').className = 'alert alert-success mb-3';
+                document.getElementById('info-text').textContent = 'Menampilkan ' + data.length + ' marker lokasi';
+                console.log('=== Load complete ===');
+            })
+            .catch(function(error) {
+                console.error('=== Error loading locations ===');
+                console.error('Error:', error);
+                console.error('Error message:', error.message);
+                document.getElementById('map-loading').style.display = 'none';
+                document.getElementById('map-info').style.display = 'block';
+                document.getElementById('map-info').className = 'alert alert-danger mb-3';
+                document.getElementById('info-text').textContent = 'Gagal memuat data: ' + error.message;
+            });
+    }
+
+    console.log('Loading initial locations...');
+    loadLocations('', '');
+
+    document.getElementById('btn-filter').addEventListener('click', function() {
+        console.log('=== Filter button clicked ===');
+        const vendorId = document.getElementById('filter-vendor').value;
+        const status = document.getElementById('filter-status').value;
+        console.log('Selected vendorId:', vendorId);
+        console.log('Selected status:', status);
+        loadLocations(vendorId, status);
+    });
+
+    console.log('=== Event listeners attached ===');
+});
+</script>
+@endsection

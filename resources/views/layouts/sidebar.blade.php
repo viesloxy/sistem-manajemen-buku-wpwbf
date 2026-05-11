@@ -123,13 +123,13 @@
             </li>
 
             <!-- STUDI KASUS 3: AKSES KAMERA -->
-            <li class="nav-item {{ Request::is('customer-data*') ? 'active' : '' }}">
-                <a class="nav-link" data-bs-toggle="collapse" href="#customer-menu" aria-expanded="{{ Request::is('customer-data*') ? 'true' : 'false' }}" aria-controls="customer-menu">
+            <li class="nav-item {{ Request::is('customer-data') || Request::is('customer-data/create-blob') || Request::is('customer-data/create-file') ? 'active' : '' }}">
+                <a class="nav-link" data-bs-toggle="collapse" href="#customer-menu" aria-expanded="{{ Request::is('customer-data') || Request::is('customer-data/create-blob') || Request::is('customer-data/create-file') ? 'true' : 'false' }}" aria-controls="customer-menu">
                     <span class="menu-title">Customer</span>
                     <i class="menu-arrow"></i>
                     <i class="mdi mdi-account-box menu-icon"></i>
                 </a>
-                <div class="collapse {{ Request::is('customer-data*') ? 'show' : '' }}" id="customer-menu">
+                <div class="collapse {{ Request::is('customer-data') || Request::is('customer-data/create-blob') || Request::is('customer-data/create-file') ? 'show' : '' }}" id="customer-menu" data-bs-parent=".nav">
                     <ul class="nav flex-column sub-menu">
                         <li class="nav-item">
                             <a class="nav-link {{ Request::is('customer-data') ? 'active' : '' }}" href="{{ route('customer-data.index') }}">
@@ -159,13 +159,13 @@
             </li>
 
             <!-- MODUL 9: GEOLOCATION -->
-            <li class="nav-item {{ Request::is('geolocation*') || Request::is('vendor/geolocation*') ? 'active' : '' }}">
-                <a class="nav-link" data-bs-toggle="collapse" href="#geolocation-menu" aria-expanded="{{ Request::is('geolocation*') || Request::is('vendor/geolocation*') ? 'true' : 'false' }}" aria-controls="geolocation-menu">
+            <li class="nav-item {{ Request::is('geolocation/map') || Request::is('geolocation/list') || Request::is('geolocation/create') ? 'active' : '' }}">
+                <a class="nav-link" data-bs-toggle="collapse" href="#geolocation-menu" aria-expanded="{{ Request::is('geolocation/map') || Request::is('geolocation/list') || Request::is('geolocation/create') ? 'true' : 'false' }}" aria-controls="geolocation-menu">
                     <span class="menu-title">Geolocation</span>
                     <i class="menu-arrow"></i>
                     <i class="mdi mdi-map-marker-radius menu-icon"></i>
                 </a>
-                <div class="collapse {{ Request::is('geolocation*') || Request::is('vendor/geolocation*') ? 'show' : '' }}" id="geolocation-menu">
+                <div class="collapse {{ Request::is('geolocation/map') || Request::is('geolocation/list') || Request::is('geolocation/create') ? 'show' : '' }}" id="geolocation-menu" data-bs-parent=".nav">
                     <ul class="nav flex-column sub-menu">
                         <li class="nav-item">
                             <a class="nav-link {{ Request::is('geolocation/map') ? 'active' : '' }}" href="{{ route('geolocation.map') }}">
