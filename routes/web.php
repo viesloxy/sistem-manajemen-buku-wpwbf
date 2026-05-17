@@ -64,10 +64,12 @@ Route::prefix('antrian')->name('antrian.')->group(function () {
     // --- SSE Endpoint (publik — untuk papan antrian & guest monitoring) ---
     Route::get('/sse', [AntrianSSEController::class, 'stream'])->name('sse');
 
-    // --- Guest Routes (publik, tanpa login) ---
-    Route::get('/guest', [AntrianGuestController::class, 'guest'])->name('guest');
-    Route::post('/daftar', [AntrianGuestController::class, 'daftar'])->name('daftar');
-    Route::get('/saya/{antrian}', [AntrianGuestController::class, 'saya'])->name('saya');
+    // --- Guest Routes (publik, tanpa login, tapi perlu CSRF protection) ---
+    Route::middleware(['web'])->group(function () {
+        Route::get('/guest', [AntrianGuestController::class, 'guest'])->name('guest');
+        Route::post('/daftar', [AntrianGuestController::class, 'daftar'])->name('daftar');
+        Route::get('/saya/{antrian}', [AntrianGuestController::class, 'saya'])->name('saya');
+    });
 
     // --- Admin Antrian (harus login + role antrian_admin) ---
     Route::middleware(['auth', 'role:antrian_admin'])->group(function () {
@@ -79,7 +81,7 @@ Route::prefix('antrian')->name('antrian.')->group(function () {
         Route::post('/admin/reset', [AntrianAdminController::class, 'resetHariIni'])->name('admin.reset');
     });
 
-    // --- Papan Antrian (publik, tanpa login) — di SPEC-03 ---
+    // --- Papan Antrian (publik, tanpa login) ---
     Route::get('/papan', [AntrianPapanController::class, 'index'])->name('papan');
 });
 
