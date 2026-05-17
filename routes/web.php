@@ -53,14 +53,34 @@ Route::get('/qrcode/{id}/page', [CustomerController::class, 'showQrPage'])->name
 Route::get('/pesanan/{id}/verifikasi', [CustomerController::class, 'verifyPesanan'])->name('customer.verify');
 
 // =========================================================================
-// AREA ANTRIAN — GUEST (TANPA LOGIN)
+// AREA ANTRIAN — KANTIN BUKU (Modul 10 SSE)
 // =========================================================================
 use App\Http\Controllers\AntrianGuestController;
+use App\Http\Controllers\AntrianAdminController;
+use App\Http\Controllers\AntrianSSEController;
 
 Route::prefix('antrian')->name('antrian.')->group(function () {
+
+    // --- SSE Endpoint (publik — untuk papan antrian & guest monitoring) ---
+    Route::get('/sse', [AntrianSSEController::class, 'stream'])->name('sse');
+
+    // --- Guest Routes (publik, tanpa login) ---
     Route::get('/guest', [AntrianGuestController::class, 'guest'])->name('guest');
     Route::post('/daftar', [AntrianGuestController::class, 'daftar'])->name('daftar');
     Route::get('/saya/{antrian}', [AntrianGuestController::class, 'saya'])->name('saya');
+
+    // --- Admin Antrian (harus login + role antrian_admin) ---
+    Route::middleware(['auth', 'role:antrian_admin'])->group(function () {
+        Route::get('/admin', [AntrianAdminController::class, 'index'])->name('admin');
+        Route::post('/admin/panggil', [AntrianAdminController::class, 'panggilBerikutnya'])->name('admin.panggil');
+        Route::post('/admin/selesai/{antrian}', [AntrianAdminController::class, 'selesaikan'])->name('admin.selesai');
+        Route::post('/admin/terlambat/{antrian}', [AntrianAdminController::class, 'tandaiTerlambat'])->name('admin.terlambat');
+        Route::post('/admin/panggil-ulang/{antrian}', [AntrianAdminController::class, 'panggilUlang'])->name('admin.panggil-ulang');
+        Route::post('/admin/reset', [AntrianAdminController::class, 'resetHariIni'])->name('admin.reset');
+    });
+
+    // --- Papan Antrian (publik, tanpa login) — di SPEC-03 ---
+    Route::get('/papan', [AntrianPapanController::class, 'index'])->name('papan');
 });
 
 

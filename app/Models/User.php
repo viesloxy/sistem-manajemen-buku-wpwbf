@@ -25,6 +25,7 @@ class User extends Authenticatable
         'otp',
         'avatar',
         'role',
+        'is_antrian_admin',
     ];
 
     /**
@@ -47,6 +48,13 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_antrian_admin' => 'boolean',
         ];
+    }
+
+    // Cek apakah user ini admin antrian
+    public function isAntrianAdmin(): bool
+    {
+        return $this->is_antrian_admin && $this->role === 'antrian_admin';
     }
 }
