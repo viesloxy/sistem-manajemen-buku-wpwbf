@@ -52,6 +52,17 @@ Route::get('/qrcode/{id}/page', [CustomerController::class, 'showQrPage'])->name
 // Verifikasi Pesanan via QR Code
 Route::get('/pesanan/{id}/verifikasi', [CustomerController::class, 'verifyPesanan'])->name('customer.verify');
 
+// =========================================================================
+// AREA ANTRIAN — GUEST (TANPA LOGIN)
+// =========================================================================
+use App\Http\Controllers\AntrianGuestController;
+
+Route::prefix('antrian')->name('antrian.')->group(function () {
+    Route::get('/guest', [AntrianGuestController::class, 'guest'])->name('guest');
+    Route::post('/daftar', [AntrianGuestController::class, 'daftar'])->name('daftar');
+    Route::get('/saya/{antrian}', [AntrianGuestController::class, 'saya'])->name('saya');
+});
+
 
 // =========================================================================
 // AREA WAJIB LOGIN (ADMIN & VENDOR SAJA)
