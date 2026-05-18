@@ -25,11 +25,12 @@ class AntrianGuestController extends Controller
     {
         $request->validate([
             'nama'      => 'required|string|max:100',
-            'vendor_id' => 'nullable|exists:vendors,id',
+            'vendor_id' => 'required|exists:vendors,id',  // WAJIB pilih vendor
         ]);
 
-        // Generate nomor antrian berikutnya
-        $lastAntrian = Antrian::whereDate('created_at', today())->max('nomor');
+        // Generate nomor antrian berikutnya — berdasarkan semua record (bukan hanya hari ini)
+        // Agar nomor tetap unik secara global, tidak bentrok dengan hari sebelumnya
+        $lastAntrian = Antrian::max('nomor');
         $lastNumber   = $lastAntrian ? (int) $lastAntrian : 0;
         $nomorBaru    = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
 
@@ -44,23 +45,31 @@ class AntrianGuestController extends Controller
         // Update cache SSE (agar semua client langsung tahu ada antrian baru)
         $this->updateSseCache();
 
-        // Redirect ke tab monitoring pribadi
-        return redirect()->route('antrian.saya', $antrian->id);
+        // Redirect ke halaman sukses dengan action buttons
+        return redirect()->route('antrian.sukses', $antrian->id);
     }
 
     // =============================================================
-    // 3. Halaman Monitoring Pribadi (/antrian/saya/{id})
+    // 4. Halaman Sukses Pendaftaran (/antrian/sukses/{id})
     // =============================================================
-    public function saya($id)
+    public function sukses($id)
+    {
+        $antrian = Antrian::with('vendor')->findOrFail($id);
+        return view('antrian.sukses', compact('antrian'));
+    }
+
+    // =============================================================
+    // 5. Cetak PDF Nomor Antrian (/antrian/cetak-pdf/{id})
+    // =============================================================
+    public function cetakPdf($id)
     {
         $antrian = Antrian::with('vendor')->findOrFail($id);
 
-        // Hitung posisi antrian
-        $posisi = Antrian::where('status', 'menunggu')
-            ->where('nomor', '<', $antrian->nomor)
-            ->count() + 1;
+        // Generate PDF menggunakan DomPDF
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('antrian.pdf', compact('antrian'));
+        $pdf->setPaper('A5', 'portrait');
 
-        return view('antrian.saya', compact('antrian', 'posisi'));
+        return $pdf->download('nomor-antrian-' . $antrian->nomor . '.pdf');
     }
 
     // =============================================================

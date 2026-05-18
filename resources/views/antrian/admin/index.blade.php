@@ -402,7 +402,7 @@
                                         </button>
                                     @endif
 
-                                    @if(in_array($antrian->status, ['terlambat', 'menunggu']))
+                                    @if(in_array($antrian->status, ['terlambat']))
                                         <form action="{{ route('antrian.admin.panggil-ulang', $antrian->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             <button type="submit" class="btn-aksi btn-aksi-panggil" title="Panggil Ulang">
@@ -435,38 +435,43 @@
 
 @section('javascript-page')
 <script>
-    const source = new EventSource('{{ route('antrian.sse') }}');
+    // ── SSE: Real-time update ──
+    (function() {
+        // Unique SSE URL per tab → browser treat sbg koneksi baru,
+        // tidak dianggap "pending request" (yg bikin spinner berputar)
+        var tabId   = Date.now() + Math.random().toString(36).substr(2, 5);
+        var sseUrl  = '{{ route('antrian.sse') }}?tab=admin&id=' + tabId;
+        var source  = new EventSource(sseUrl);
 
-    source.addEventListener('queue-update', function(event) {
-        const data = JSON.parse(event.data);
+        source.addEventListener('queue-update', function(event) {
+            var data = JSON.parse(event.data);
 
-        if (data.stats) {
-            document.getElementById('stat-menunggu').textContent  = data.stats.menunggu  ?? 0;
-            document.getElementById('stat-dipanggil').textContent = data.stats.dipanggil ?? 0;
-            document.getElementById('stat-terlambat').textContent = data.stats.terlambat ?? 0;
-            document.getElementById('stat-selesai').textContent   = data.stats.selesai   ?? 0;
-        }
+            if (data.stats) {
+                document.getElementById('stat-menunggu').textContent  = data.stats.menunggu  ?? 0;
+                document.getElementById('stat-dipanggil').textContent = data.stats.dipanggil ?? 0;
+                document.getElementById('stat-terlambat').textContent = data.stats.terlambat ?? 0;
+                document.getElementById('stat-selesai').textContent   = data.stats.selesai   ?? 0;
+            }
 
-        const dipanggilEl   = document.getElementById('nomor-dipanggil');
-        const namaEl       = document.getElementById('nama-dipanggil');
-        const vendorEl     = document.getElementById('vendor-dipanggil');
+            var dipanggilEl = document.getElementById('nomor-dipanggil');
+            var namaEl      = document.getElementById('nama-dipanggil');
+            var vendorEl    = document.getElementById('vendor-dipanggil');
 
-        if (data.dipanggil) {
-            if (dipanggilEl) dipanggilEl.textContent = data.dipanggil.nomor;
-            if (namaEl)      namaEl.textContent      = data.dipanggil.nama;
-            if (vendorEl)    vendorEl.innerHTML      = '<i class="mdi mdi-store"></i> ' + (data.dipanggil.vendor ?? '-');
-        }
-    });
+            if (data.dipanggil) {
+                if (dipanggilEl) dipanggilEl.textContent = data.dipanggil.nomor;
+                if (namaEl)      namaEl.textContent      = data.dipanggil.nama;
+                if (vendorEl)    vendorEl.innerHTML      = '<i class="mdi mdi-store"></i> ' + (data.dipanggil.vendor ?? '-');
+            }
+        });
 
-    source.onerror = function(error) {
-        console.warn('SSE connection lost, will retry...');
-    };
+        source.onerror = function() {
+            console.warn('SSE connection lost, browser will auto-reconnect...');
+            // Browser EventSource otomatis reconnect, tidak perlu reload page
+        };
 
-    // Auto-reload setiap 30 detik untuk sinkronisasi penuh
-    setInterval(() => {
-        if (!document.hidden) {
-            location.reload();
-        }
-    }, 30000);
+        // Tutup koneksi SSE saat tab di-close → hentikan spinner
+        window.addEventListener('beforeunload', function() { source.close(); });
+        window.addEventListener('pagehide',    function() { source.close(); });
+    })();
 </script>
 @endsection

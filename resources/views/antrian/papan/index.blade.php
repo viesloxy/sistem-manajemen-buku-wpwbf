@@ -408,60 +408,68 @@
 
 <script>
     /* ── SSE Real-time Update ──────────────────────── */
-    let lastDipanggilId = null;
+    (function() {
+        var lastDipanggilId = null;
+        var tabId  = Date.now() + Math.random().toString(36).substr(2, 5);
+        var sseUrl = '{{ route('antrian.sse') }}?tab=papan&id=' + tabId;
+        var source = new EventSource(sseUrl);
 
-    const source = new EventSource('{{ route('antrian.sse') }}');
+        source.addEventListener('queue-update', function(event) {
+            var data = JSON.parse(event.data);
 
-    source.addEventListener('queue-update', function(event) {
-        const data = JSON.parse(event.data);
-
-        // Update statistik
-        if (data.stats) {
-            const elMenunggu  = document.getElementById('stat-menunggu');
-            const elTerlambat = document.getElementById('stat-terlambat');
-            const elSelesai   = document.getElementById('stat-selesai');
-            const elTotal     = document.getElementById('stat-total');
-            if (elMenunggu)  elMenunggu.textContent  = data.stats.menunggu  ?? 0;
-            if (elTerlambat) elTerlambat.textContent = data.stats.terlambat ?? 0;
-            if (elSelesai)   elSelesai.textContent   = data.stats.selesai   ?? 0;
-            if (elTotal) {
-                const total = (data.stats.menunggu  ?? 0)
-                            + (data.stats.dipanggil ?? 0)
-                            + (data.stats.terlambat ?? 0)
-                            + (data.stats.selesai   ?? 0);
-                elTotal.textContent = total;
+            // Update statistik
+            if (data.stats) {
+                var elMenunggu  = document.getElementById('stat-menunggu');
+                var elTerlambat = document.getElementById('stat-terlambat');
+                var elSelesai   = document.getElementById('stat-selesai');
+                var elTotal     = document.getElementById('stat-total');
+                if (elMenunggu)  elMenunggu.textContent  = data.stats.menunggu  ?? 0;
+                if (elTerlambat) elTerlambat.textContent = data.stats.terlambat ?? 0;
+                if (elSelesai)   elSelesai.textContent   = data.stats.selesai   ?? 0;
+                if (elTotal) {
+                    var total = (data.stats.menunggu  ?? 0)
+                                + (data.stats.dipanggil ?? 0)
+                                + (data.stats.terlambat ?? 0)
+                                + (data.stats.selesai   ?? 0);
+                    elTotal.textContent = total;
+                }
             }
-        }
 
-        // Cek apakah ada nomor baru yang dipanggil
-        if (data.dipanggil) {
-            const idSekarang = data.dipanggil.id;
+            // Cek apakah ada nomor baru yang dipanggil
+            if (data.dipanggil) {
+                var idSekarang = data.dipanggil.id;
 
-            if (idSekarang !== lastDipanggilId) {
-                lastDipanggilId = idSekarang;
+                if (idSekarang !== lastDipanggilId) {
+                    lastDipanggilId = idSekarang;
 
-                updateDipanggilDisplay(
-                    data.dipanggil.nomor,
-                    data.dipanggil.nama,
-                    data.dipanggil.vendor
-                );
+                    updateDipanggilDisplay(
+                        data.dipanggil.nomor,
+                        data.dipanggil.nama,
+                        data.dipanggil.vendor
+                    );
 
-                playSoundAndSpeech(
-                    data.dipanggil.nomor,
-                    data.dipanggil.nama,
-                    data.dipanggil.vendor
-                );
+                    playSoundAndSpeech(
+                        data.dipanggil.nomor,
+                        data.dipanggil.nama,
+                        data.dipanggil.vendor
+                    );
+                }
             }
-        }
 
-        // Update daftar nomor selanjutnya
-        if (data.menunggu && data.menunggu.length > 0) {
-            updateDaftarSelanjutan(data.menunggu);
-        }
-    });
+            // Update daftar nomor selanjutnya
+            if (data.menunggu && data.menunggu.length > 0) {
+                updateDaftarSelanjutan(data.menunggu);
+            }
+        });
 
-    source.onerror = function(error) {
-        console.warn('SSE error, will retry...');
+        source.onerror = function() {
+            console.warn('SSE connection lost, browser will auto-reconnect...');
+            // Browser EventSource otomatis reconnect, tidak perlu reload page
+        };
+
+        // Tutup koneksi SSE saat tab di-close
+        window.addEventListener('beforeunload', function() { source.close(); });
+        window.addEventListener('pagehide',    function() { source.close(); });
     };
 
     /* ── Update Tampilan Nomor Dipanggil ─────────── */

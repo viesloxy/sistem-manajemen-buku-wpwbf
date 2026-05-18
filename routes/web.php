@@ -58,17 +58,22 @@ Route::get('/pesanan/{id}/verifikasi', [CustomerController::class, 'verifyPesana
 use App\Http\Controllers\AntrianGuestController;
 use App\Http\Controllers\AntrianAdminController;
 use App\Http\Controllers\AntrianSSEController;
+use App\Http\Controllers\AntrianPapanController;
 
 Route::prefix('antrian')->name('antrian.')->group(function () {
 
     // --- SSE Endpoint (publik — untuk papan antrian & guest monitoring) ---
-    Route::get('/sse', [AntrianSSEController::class, 'stream'])->name('sse');
+    // Bypasses session middleware agar TIDAK memblokir tab lain yang reuse session cookie yang sama
+    Route::get('/sse', [AntrianSSEController::class, 'stream'])
+         ->withoutMiddleware([\Illuminate\Session\Middleware\StartSession::class])
+         ->name('sse');
 
     // --- Guest Routes (publik, tanpa login, tapi perlu CSRF protection) ---
     Route::middleware(['web'])->group(function () {
         Route::get('/guest', [AntrianGuestController::class, 'guest'])->name('guest');
         Route::post('/daftar', [AntrianGuestController::class, 'daftar'])->name('daftar');
-        Route::get('/saya/{antrian}', [AntrianGuestController::class, 'saya'])->name('saya');
+        Route::get('/sukses/{antrian}', [AntrianGuestController::class, 'sukses'])->name('sukses');
+        Route::get('/cetak-pdf/{antrian}', [AntrianGuestController::class, 'cetakPdf'])->name('cetak-pdf');
     });
 
     // --- Admin Antrian (harus login + role antrian_admin) ---

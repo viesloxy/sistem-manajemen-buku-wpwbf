@@ -374,13 +374,12 @@
                     <div class="mb-3">
                         <div class="step-label">
                             <span class="step-num">2</span> Vendor Tujuan
-                            <span style="color:var(--pa-muted);font-weight:400;text-transform:none;letter-spacing:0;">
-                                &nbsp;(opsional)
-                            </span>
+                            <span style="color:#dc2626;font-weight:800;">*</span>
                         </div>
                         <select name="vendor_id"
                                 id="vendor_id"
-                                class="pos-select @error('vendor_id') is-invalid @enderror">
+                                class="pos-select @error('vendor_id') is-invalid @enderror"
+                                required>
                             <option value="">-- Pilih Vendor --</option>
                             @foreach($vendors as $vendor)
                                 <option value="{{ $vendor->id }}"

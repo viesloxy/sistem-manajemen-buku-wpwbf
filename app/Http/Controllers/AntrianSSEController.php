@@ -9,6 +9,8 @@ class AntrianSSEController extends Controller
 {
     public function stream(Request $request)
     {
+        ignore_user_abort(true);
+
         return response()->stream(function () {
             set_time_limit(0);
 
@@ -30,7 +32,7 @@ class AntrianSSEController extends Controller
                     break;
                 }
 
-                usleep(1000000); // 1 detik
+                sleep(2); // 2 detik antar broadcast (irit resources)
             }
         }, 200, [
             'Content-Type'  => 'text/event-stream',
