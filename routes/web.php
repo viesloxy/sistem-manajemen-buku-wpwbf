@@ -60,13 +60,18 @@ use App\Http\Controllers\AntrianAdminController;
 use App\Http\Controllers\AntrianSSEController;
 use App\Http\Controllers\AntrianPapanController;
 
-Route::prefix('antrian')->name('antrian.')->group(function () {
+// --- SSE Endpoint (di luar web middleware group untuk avoid session lock) ---
+Route::get('/antrian/sse', [AntrianSSEController::class, 'stream'])
+    ->withoutMiddleware([
+        \Illuminate\Session\Middleware\StartSession::class,
+        \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+        \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+        \Illuminate\Cookie\Middleware\EncryptCookies::class,
+        \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+    ])
+    ->name('antrian.sse');
 
-    // --- SSE Endpoint (publik — untuk papan antrian & guest monitoring) ---
-    // Bypasses session middleware agar TIDAK memblokir tab lain yang reuse session cookie yang sama
-    Route::get('/sse', [AntrianSSEController::class, 'stream'])
-         ->withoutMiddleware([\Illuminate\Session\Middleware\StartSession::class])
-         ->name('sse');
+Route::prefix('antrian')->name('antrian.')->group(function () {
 
     // --- Guest Routes (publik, tanpa login, tapi perlu CSRF protection) ---
     Route::middleware(['web'])->group(function () {
@@ -95,7 +100,7 @@ Route::prefix('antrian')->name('antrian.')->group(function () {
 // AREA WAJIB LOGIN (ADMIN & VENDOR SAJA)
 // =========================================================================
 Route::middleware(['auth'])->group(function () {
-    
+
     // Route dashboard
     Route::get('/dashboard', function () {
         return view('dashboard');
@@ -116,9 +121,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('laporan/katalog-pdf', [LaporanController::class, 'generateKatalog'])->name('laporan.katalog');
     Route::get('laporan/stok-pdf', [LaporanController::class, 'generateStok'])->name('laporan.stok');
 
-    Route::get('/simulasi-produk', function () { return view('simulasi.simulasi-index'); })->name('simulasi.index');
-    Route::get('/simulasi-datatables', function () { return view('simulasi.simulasi-datatables'); })->name('simulasi.datatables');
-    Route::get('/simulasi-wilayah', function () { return view('simulasi.simulasi-wilayah'); })->name('simulasi.wilayah');
+    Route::get('/simulasi-produk', function () {
+        return view('simulasi.simulasi-index'); })->name('simulasi.index');
+    Route::get('/simulasi-datatables', function () {
+        return view('simulasi.simulasi-datatables'); })->name('simulasi.datatables');
+    Route::get('/simulasi-wilayah', function () {
+        return view('simulasi.simulasi-wilayah'); })->name('simulasi.wilayah');
 
     Route::get('/wilayah-indonesia', [WilayahController::class, 'index'])->name('wilayah.index');
     Route::prefix('api-wilayah')->group(function () {

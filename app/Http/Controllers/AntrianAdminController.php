@@ -179,6 +179,19 @@ class AntrianAdminController extends Controller
                                    'nama'   => $a->nama,
                                    'vendor' => $a->vendor?->nama_vendor,
                                ]),
+            // TAMBAHAN: Daftar SEMUA antrian hari ini untuk update tabel admin
+            'antrians' => Antrian::hariIni()
+                               ->with('vendor')
+                               ->orderBy('nomor', 'asc')
+                               ->get()
+                               ->map(fn($a) => [
+                                   'id'         => $a->id,
+                                   'nomor'      => $a->nomor,
+                                   'nama'       => $a->nama,
+                                   'vendor'     => $a->vendor?->nama_vendor,
+                                   'status'     => $a->status,
+                                   'created_at' => $a->created_at->format('H:i'),
+                               ]),
         ];
 
         Cache::put('antrian_data', $data, now()->addDay());

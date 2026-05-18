@@ -254,5 +254,24 @@
         <!-- ============================== -->
         <!-- AKHIR MENU KHUSUS VENDOR -->
         <!-- ============================== -->
+
+        <!-- ============================== -->
+        <!-- MULAI MENU KHUSUS ADMIN ANTRIAN -->
+        <!-- ============================== -->
+        @if(Auth::user()->role == 'antrian_admin')
+            <li class="nav-item pt-3">
+                <span class="nav-link text-muted font-weight-bold" style="font-size: 12px; letter-spacing: 1px;">MENU ADMIN ANTRIAN</span>
+            </li>
+
+            <li class="nav-item {{ Request::is('antrian/admin*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('antrian.admin') }}">
+                    <span class="menu-title">Manajemen Antrian</span>
+                    <i class="mdi mdi-account-clock menu-icon"></i>
+                </a>
+            </li>
+        @endif
+        <!-- ============================== -->
+        <!-- AKHIR MENU KHUSUS ADMIN ANTRIAN -->
+        <!-- ============================== -->
     </ul>
 </nav>
