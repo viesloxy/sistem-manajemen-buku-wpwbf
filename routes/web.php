@@ -20,6 +20,7 @@ use App\Http\Controllers\BarcodeController;
 use App\Http\Controllers\NfcController;
 use App\Http\Controllers\AdminNfcController;
 use App\Http\Controllers\VendorNfcController;
+use App\Http\Middleware\EnsureUserHasRole;
 
 Auth::routes();
 
@@ -221,7 +222,7 @@ Route::middleware(['auth'])->group(function () {
     // ========================================================================
 
     // Admin NFC Routes
-    Route::prefix('nfc')->name('nfc.')->group(function () {
+    Route::middleware(['auth', 'hasRole:admin'])->prefix('nfc')->name('nfc.')->group(function () {
         Route::get('/scan', [NfcController::class, 'scan'])->name('scan');
         Route::post('/scan/proses', [NfcController::class, 'prosesScan'])->name('scan.proses');
         Route::get('/tags', [AdminNfcController::class, 'indexTags'])->name('tags.index');
@@ -235,11 +236,14 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Vendor NFC Routes
-    Route::prefix('vendor/nfc')->name('vendor.nfc.')->group(function () {
-        Route::get('/scan', [VendorNfcController::class, 'scan'])->name('scan');
-        Route::post('/scan/proses', [VendorNfcController::class, 'prosesScan'])->name('scan.proses');
-        Route::get('/logs', [VendorNfcController::class, 'log'])->name('logs');
-        Route::get('/tags/create', [VendorNfcController::class, 'createTag'])->name('tags.create');
-        Route::post('/tags', [VendorNfcController::class, 'storeTag'])->name('tags.store');
+    Route::middleware(['auth', 'hasRole:vendor'])->group(function () {
+        // Vendor NFC Routes
+        Route::prefix('vendor/nfc')->name('vendor.nfc.')->group(function () {
+            Route::get('/scan', [VendorNfcController::class, 'scan'])->name('scan');
+            Route::post('/scan/proses', [VendorNfcController::class, 'prosesScan'])->name('scan.proses');
+            Route::get('/logs', [VendorNfcController::class, 'log'])->name('logs');
+            Route::get('/tags/create', [VendorNfcController::class, 'createTag'])->name('tags.create');
+            Route::post('/tags', [VendorNfcController::class, 'storeTag'])->name('tags.store');
+        });
     });
 });

@@ -10,11 +10,7 @@ use Illuminate\Support\Facades\Auth;
 
 class VendorNfcController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('role:vendor');
-    }
-
+    
     /**
      * Halaman scan NFC untuk vendor.
      */
