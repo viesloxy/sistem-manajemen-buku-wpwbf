@@ -20,7 +20,9 @@ class AdminNfcController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
-        return view('nfc.tags.index', compact('tags'));
+        $vendors = Vendor::all();
+
+        return view('nfc.tags.index', compact('tags', 'vendors'));
     }
 
     /**

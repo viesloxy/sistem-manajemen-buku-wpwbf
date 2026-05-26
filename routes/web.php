@@ -17,6 +17,9 @@ use App\Http\Controllers\ScannerBarangController;
 use App\Http\Controllers\VendorScanController;
 use App\Http\Controllers\GeolocationController;
 use App\Http\Controllers\BarcodeController;
+use App\Http\Controllers\NfcController;
+use App\Http\Controllers\AdminNfcController;
+use App\Http\Controllers\VendorNfcController;
 
 Auth::routes();
 
@@ -211,5 +214,32 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/geolocation', [GeolocationController::class, 'apiStore']);
         Route::get('/barcodes', [BarcodeController::class, 'index']);
         Route::get('/barcodes/{barcode}', [BarcodeController::class, 'show']);
+    });
+
+    // ========================================================================
+    // MODUL 11: NFC (NEAR FIELD COMMUNICATION)
+    // ========================================================================
+
+    // Admin NFC Routes
+    Route::prefix('nfc')->name('nfc.')->group(function () {
+        Route::get('/scan', [NfcController::class, 'scan'])->name('scan');
+        Route::post('/scan/proses', [NfcController::class, 'prosesScan'])->name('scan.proses');
+        Route::get('/tags', [AdminNfcController::class, 'indexTags'])->name('tags.index');
+        Route::get('/tags/create', [AdminNfcController::class, 'createTag'])->name('tags.create');
+        Route::post('/tags', [AdminNfcController::class, 'storeTag'])->name('tags.store');
+        Route::get('/tags/{nfcTag}/edit', [AdminNfcController::class, 'editTag'])->name('tags.edit');
+        Route::put('/tags/{nfcTag}', [AdminNfcController::class, 'updateTag'])->name('tags.update');
+        Route::delete('/tags/{nfcTag}', [AdminNfcController::class, 'destroyTag'])->name('tags.destroy');
+        Route::get('/logs', [NfcController::class, 'log'])->name('logs.index');
+        Route::get('/logs/export', [AdminNfcController::class, 'exportLogs'])->name('logs.export');
+    });
+
+    // Vendor NFC Routes
+    Route::prefix('vendor/nfc')->name('vendor.nfc.')->group(function () {
+        Route::get('/scan', [VendorNfcController::class, 'scan'])->name('scan');
+        Route::post('/scan/proses', [VendorNfcController::class, 'prosesScan'])->name('scan.proses');
+        Route::get('/logs', [VendorNfcController::class, 'log'])->name('logs');
+        Route::get('/tags/create', [VendorNfcController::class, 'createTag'])->name('tags.create');
+        Route::post('/tags', [VendorNfcController::class, 'storeTag'])->name('tags.store');
     });
 });

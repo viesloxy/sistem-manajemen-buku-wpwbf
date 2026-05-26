@@ -20,13 +20,18 @@ class VendorNfcController extends Controller
      */
     public function scan()
     {
-        return view('vendor.nfc.scan');
+        $todayLogs = AbsensiNfcLog::with(['nfcTag'])
+            ->where('vendor_id', Auth::user()->vendor_id)
+            ->whereDate('scanned_at', now()->toDateString())
+            ->orderBy('scanned_at', 'desc')
+            ->limit(10)
+            ->get();
+
+        return view('vendor.nfc.scan', compact('todayLogs'));
     }
 
     /**
      * Proses hasil scan NFC (Vendor).
-     * Ini alternatif route jika vendor ingin menggunakan endpoint terpisah.
-     * Namun secara default, vendor bisa menggunakan NfcController@prosesScan.
      */
     public function prosesScan(Request $request)
     {
@@ -38,7 +43,6 @@ class VendorNfcController extends Controller
         $serial = $request->serial_number;
         $tipeLog = $request->tipe_log;
 
-        // Cari kartu berdasarkan serial number
         $tag = NfcTag::where('serial_number', $serial)->first();
 
         if (!$tag) {
@@ -48,7 +52,6 @@ class VendorNfcController extends Controller
             ], 404);
         }
 
-        // Pastikan kartu milik vendor ini atau kartu umum
         if ($tag->vendor_id && $tag->vendor_id !== Auth::user()->vendor_id) {
             return response()->json([
                 'status' => 'error',
@@ -63,7 +66,6 @@ class VendorNfcController extends Controller
             ], 400);
         }
 
-        // Catat log absensi
         $log = AbsensiNfcLog::create([
             'nfc_tag_id' => $tag->id,
             'user_id' => Auth::id(),
@@ -90,20 +92,19 @@ class VendorNfcController extends Controller
     public function log(Request $request)
     {
         $query = AbsensiNfcLog::with(['nfcTag', 'user'])
-            ->byVendor(Auth::user()->vendor_id)
+            ->where('vendor_id', Auth::user()->vendor_id)
             ->orderBy('scanned_at', 'desc');
 
-        // Filter by log type
         if ($request->has('tipe_log') && $request->tipe_log) {
-            $query->byType($request->tipe_log);
+            $query->where('tipe_log', $request->tipe_log);
         }
 
-        // Filter by date range
         if ($request->has('start_date') && $request->start_date) {
             $endDate = $request->has('end_date') && $request->end_date
                 ? $request->end_date
                 : now()->format('Y-m-d');
-            $query->byDateRange($request->start_date, $endDate);
+            $query->whereDate('scanned_at', '>=', $request->start_date)
+                  ->whereDate('scanned_at', '<=', $endDate);
         }
 
         $logs = $query->paginate(50);
@@ -116,7 +117,6 @@ class VendorNfcController extends Controller
      */
     public function createTag()
     {
-        // Ambil staff yang belong ke vendor ini
         $staff = User::where('vendor_id', Auth::user()->vendor_id)
             ->where('role', 'staff')
             ->get();
@@ -136,26 +136,12 @@ class VendorNfcController extends Controller
             'tipe' => 'required|in:staff',
         ]);
 
-        // Otomatis set vendor_id dan status
         $validated['vendor_id'] = Auth::user()->vendor_id;
         $validated['status'] = 'aktif';
 
         NfcTag::create($validated);
 
-        return redirect()->route('vendor.nfc.log')
+        return redirect()->route('vendor.nfc.logs')
             ->with('success', 'Kartu NFC staff berhasil didaftarkan');
-    }
-
-    /**
-     * Daftar staff vendor yang sudah punya kartu NFC.
-     */
-    public function indexStaff()
-    {
-        $tags = NfcTag::with(['user'])
-            ->byVendor(Auth::user()->vendor_id)
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
-
-        return view('vendor.nfc.tags.index', compact('tags'));
     }
 }

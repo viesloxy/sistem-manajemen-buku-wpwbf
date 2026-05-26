@@ -14,12 +14,21 @@ class NfcController extends Controller
      */
     public function scan()
     {
-        // Cek permission: hanya admin dan vendor yang bisa akses
         if (!in_array(Auth::user()->role, ['admin', 'vendor'])) {
             abort(403, 'Unauthorized');
         }
 
-        return view('nfc.scan');
+        $recentScansQuery = AbsensiNfcLog::with(['nfcTag', 'user'])
+            ->orderBy('scanned_at', 'desc')
+            ->limit(10);
+
+        if (Auth::user()->role === 'vendor') {
+            $recentScansQuery->where('vendor_id', Auth::user()->vendor_id);
+        }
+
+        $recentScans = $recentScansQuery->get();
+
+        return view('nfc.scan', compact('recentScans'));
     }
 
     /**
@@ -35,7 +44,6 @@ class NfcController extends Controller
         $serial = $request->serial_number;
         $tipeLog = $request->tipe_log;
 
-        // Cari kartu berdasarkan serial number
         $tag = NfcTag::where('serial_number', $serial)->first();
 
         if (!$tag) {
@@ -52,7 +60,6 @@ class NfcController extends Controller
             ], 400);
         }
 
-        // Catat log absensi
         $log = AbsensiNfcLog::create([
             'nfc_tag_id' => $tag->id,
             'user_id' => Auth::id(),
@@ -76,22 +83,30 @@ class NfcController extends Controller
     /**
      * Lihat log absensi sendiri (untuk vendor/admin)
      */
-    public function log()
+    public function log(Request $request)
     {
         $user = Auth::user();
 
+        $query = AbsensiNfcLog::with(['nfcTag', 'user', 'vendor'])
+            ->orderBy('scanned_at', 'desc');
+
         if ($user->role === 'vendor') {
-            // Vendor hanya lihat log vendor sendiri
-            $logs = AbsensiNfcLog::with(['nfcTag', 'user'])
-                ->byVendor($user->vendor_id)
-                ->orderBy('scanned_at', 'desc')
-                ->paginate(20);
-        } else {
-            // Admin lihat semua log
-            $logs = AbsensiNfcLog::with(['nfcTag', 'user', 'vendor'])
-                ->orderBy('scanned_at', 'desc')
-                ->paginate(20);
+            $query->where('vendor_id', $user->vendor_id);
         }
+
+        if ($request->has('tipe_log') && $request->tipe_log) {
+            $query->where('tipe_log', $request->tipe_log);
+        }
+
+        if ($request->has('start_date') && $request->start_date) {
+            $endDate = $request->has('end_date') && $request->end_date
+                ? $request->end_date
+                : now()->format('Y-m-d');
+            $query->whereDate('scanned_at', '>=', $request->start_date)
+                  ->whereDate('scanned_at', '<=', $endDate);
+        }
+
+        $logs = $query->paginate(20);
 
         return view('nfc.logs.index', compact('logs'));
     }

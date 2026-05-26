@@ -193,6 +193,34 @@
                     <i class="mdi mdi-barcode menu-icon"></i>
                 </a>
             </li>
+
+            <!-- MODUL 11: NFC (Sidebar Terpisah) -->
+            <li class="nav-item {{ Request::is('nfc*') ? 'active' : '' }}">
+                <a class="nav-link" data-bs-toggle="collapse" href="#nfc-admin-menu" aria-expanded="{{ Request::is('nfc*') ? 'true' : 'false' }}" aria-controls="nfc-admin-menu">
+                    <span class="menu-title">NFC Absensi</span>
+                    <i class="menu-arrow"></i>
+                    <i class="mdi mdi-nfc menu-icon"></i>
+                </a>
+                <div class="collapse {{ Request::is('nfc*') ? 'show' : '' }}" id="nfc-admin-menu" data-bs-parent=".nav">
+                    <ul class="nav flex-column sub-menu">
+                        <li class="nav-item">
+                            <a class="nav-link {{ Request::is('nfc/scan') ? 'active' : '' }}" href="{{ route('nfc.scan') }}">
+                                Scan NFC
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ Request::is('nfc/tags*') ? 'active' : '' }}" href="{{ route('nfc.tags.index') }}">
+                                Kelola Tags
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ Request::is('nfc/logs') ? 'active' : '' }}" href="{{ route('nfc.logs.index') }}">
+                                Log Aktivitas
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
         @endif
         <!-- ============================== -->
         <!-- AKHIR MENU KHUSUS ADMIN -->
@@ -245,6 +273,34 @@
                         <li class="nav-item">
                             <a class="nav-link {{ Request::is('vendor/geolocation/titik-kunjungan') ? 'active' : '' }}" href="{{ route('vendor.geolocation.titik-kunjungan') }}">
                                 Titik Kunjungan
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
+            <!-- MODUL 11: NFC ABSENSI (VENDOR) -->
+            <li class="nav-item {{ Request::is('vendor/nfc*') ? 'active' : '' }}">
+                <a class="nav-link" data-bs-toggle="collapse" href="#nfc-vendor-menu" aria-expanded="{{ Request::is('vendor/nfc*') ? 'true' : 'false' }}" aria-controls="nfc-vendor-menu">
+                    <span class="menu-title">NFC Absensi</span>
+                    <i class="menu-arrow"></i>
+                    <i class="mdi mdi-nfc menu-icon"></i>
+                </a>
+                <div class="collapse {{ Request::is('vendor/nfc*') ? 'show' : '' }}" id="nfc-vendor-menu">
+                    <ul class="nav flex-column sub-menu">
+                        <li class="nav-item">
+                            <a class="nav-link {{ Request::is('vendor/nfc/scan') ? 'active' : '' }}" href="{{ route('vendor.nfc.scan') }}">
+                                Scan NFC
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ Request::is('vendor/nfc/logs') ? 'active' : '' }}" href="{{ route('vendor.nfc.logs') }}">
+                                Log Absensi
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ Request::is('vendor/nfc/tags/create') ? 'active' : '' }}" href="{{ route('vendor.nfc.tags.create') }}">
+                                Tambah Tag
                             </a>
                         </li>
                     </ul>
